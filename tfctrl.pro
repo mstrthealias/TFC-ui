@@ -4,8 +4,8 @@ CONFIG += c++11
 
 INCLUDEPATH += ../HIDAPI
 
-LIBS += -lhid -lsetupapi -L../build-HIDAPI-Desktop_Qt_5_13_2_MSVC2017_64bit-Debug/windows -lHIDAPI
-#win32:LIBS +=
+win32:LIBS += -lhid -lsetupapi -L../build-HIDAPI-Desktop_Qt_5_13_2_MSVC2017_64bit-Debug/windows -lHIDAPI
+linux:LIBS += -lusb-1.0 -lhidapi-libusb -L../HIDAPI/linux -lHIDAPI
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
