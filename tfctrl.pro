@@ -4,7 +4,7 @@ CONFIG += c++11
 
 INCLUDEPATH += ../HIDAPI
 
-win32:LIBS += -lhid -lsetupapi -L../build-HIDAPI-Desktop_Qt_5_13_2_MSVC2017_64bit-Debug/windows -lHIDAPI
+win32:LIBS += -lhid -lsetupapi -L../HIDAPI/windows -lHIDAPI
 linux:LIBS += -lhidapi-hidraw -L../HIDAPI/linux -lHIDAPI
 
 # The following define makes your compiler emit warnings if you use

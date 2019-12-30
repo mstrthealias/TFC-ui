@@ -82,6 +82,7 @@ void HID_PnP::pollUSB()
 
     if (ui_data.isConnectedLog == false) {
         deviceLog = hid_open_usage(0x16C0, 0x0486, 0xFFC9, 0x0004);  // Serial log
+//        deviceLog = hid_open_usage(0x16C0, 0x0486, 0x2f30, 0x3030);  // Serial log -- Linux HIDRAW??
         if (deviceLog) {
             qDebug() << "HID Log connected";
             ui_data.isConnectedLog = true;
@@ -95,6 +96,7 @@ void HID_PnP::pollUSB()
     }
     if (ui_data.isConnectedData == false) {
         deviceData = hid_open_usage(0x16C0, 0x0486, 0xFFAB, 0x0200);  // USB RAW
+//        deviceData = hid_open_usage(0x16C0, 0x0486, 0x67, 0x65);  // USB RAW -- Linux HIDRAW??
         if (deviceData) {
             qDebug() << "HID Data connected";
             ui_data.isConnectedData = true;
