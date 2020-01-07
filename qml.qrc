@@ -6,7 +6,8 @@
         <file>log.qml</file>
         <file>hardware.qml</file>
         <file>HardwareFan.qml</file>
-        <file>pid.qml</file>
+        <file>ControlPID.qml</file>
         <file>HardwareSensor.qml</file>
+        <file>pid.qml</file>
     </qresource>
 </RCC>

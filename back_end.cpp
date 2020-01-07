@@ -39,7 +39,7 @@ quint8 BackEndFan::pinRPM()
 }
 quint8 BackEndFan::mode()
 {
-    return fanConfig.mode;
+    return static_cast<quint8>(fanConfig.mode);
 }
 qreal BackEndFan::ratio()
 {
@@ -69,11 +69,11 @@ void BackEndFan::setPinRPM(const quint8 &pinRPM)
 }
 void BackEndFan::setMode(const quint8 &mode)
 {
-    if (mode == fanConfig.mode)
+    if (mode == static_cast<quint8>(fanConfig.mode))
         return;
 
-    fanConfig.mode = mode == 0 ? MODE_PERCENT_TABLE
-                                   : MODE_PID;
+    fanConfig.mode = mode == 0 ? CONTROL_MODE::MODE_TBL
+                                   : CONTROL_MODE::MODE_PID;
     emit modeChanged();
 }
 void BackEndFan::setRatio(const qreal &ratio)
@@ -203,11 +203,11 @@ void BackEndPIDStep::setCaseTempDelta(const qreal &caseTempDelta)
 
 
 
-BackEndPID::BackEndPID(RuntimeConfig &config, QObject *parent) :
-    QObject(parent), config(config)
+BackEndPID::BackEndPID(RuntimeConfig::PIDConfig &pid, QObject *parent) :
+    QObject(parent), pid(pid)
 {
-    stepUpConfig = new BackEndPIDStep(config.pid.adaptive_sp_step_up, parent);
-    stepDownConfig = new BackEndPIDStep(config.pid.adaptive_sp_step_down, parent);
+    stepUpConfig = new BackEndPIDStep(pid.adaptive_sp_step_up, parent);
+    stepDownConfig = new BackEndPIDStep(pid.adaptive_sp_step_down, parent);
 }
 
 BackEndPID::~BackEndPID()
@@ -224,62 +224,62 @@ BackEndPID::~BackEndPID()
 
 quint8 BackEndPID::percentMin()
 {
-    return config.pwm_percent_min;
+    return pid.pwm_percent_min;
 }
 
 quint8 BackEndPID::percentMax1()
 {
-    return config.pwm_percent_max1;
+    return pid.pwm_percent_max1;
 }
 
 quint8 BackEndPID::percentMax2()
 {
-    return config.pwm_percent_max2;
+    return pid.pwm_percent_max2;
 }
 
 qreal BackEndPID::setpoint()
 {
-    return toReal(config.pid.setpoint);
+    return toReal(pid.setpoint);
 }
 
 qreal BackEndPID::setpointMin()
 {
-    return toReal(config.pid.setpoint_min);
+    return toReal(pid.setpoint_min);
 }
 
 qreal BackEndPID::setpointMax()
 {
-    return toReal(config.pid.setpoint_max);
+    return toReal(pid.setpoint_max);
 }
 
 qreal BackEndPID::gainP()
 {
-    return toReal(config.pid.gain_p);
+    return toReal(pid.gain_p);
 }
 
 qreal BackEndPID::gainI()
 {
-    return toReal(config.pid.gain_i);
+    return toReal(pid.gain_i);
 }
 
 qreal BackEndPID::gainD()
 {
-    return toReal(config.pid.gain_d);
+    return toReal(pid.gain_d);
 }
 
 bool BackEndPID::adaptiveSP()
 {
-    return config.pid.adaptive_sp;
+    return pid.adaptive_sp;
 }
 
 bool BackEndPID::adaptiveSPUseCaseTemp()
 {
-    return config.pid.adaptive_sp_check_case_temp;
+    return pid.adaptive_sp_check_case_temp;
 }
 
 qreal BackEndPID::adaptiveSPStepSize()
 {
-    return toReal(config.pid.adaptive_sp_step_size);
+    return toReal(pid.adaptive_sp_step_size);
 }
 
 BackEndPIDStep* BackEndPID::adaptiveSPStepUp()
@@ -294,109 +294,109 @@ BackEndPIDStep* BackEndPID::adaptiveSPStepDown()
 
 void BackEndPID::setPercentMin(const quint8 pct)
 {
-    if (pct == config.pwm_percent_min)
+    if (pct == pid.pwm_percent_min)
         return;
 
-    config.pwm_percent_min = pct;
+    pid.pwm_percent_min = pct;
     emit percentMinChanged();
 }
 
 void BackEndPID::setPercentMax1(const quint8 pct)
 {
-    if (pct == config.pwm_percent_max1)
+    if (pct == pid.pwm_percent_max1)
         return;
 
-    config.pwm_percent_max1 = pct;
+    pid.pwm_percent_max1 = pct;
     emit percentMax1Changed();
 }
 
 void BackEndPID::setPercentMax2(const quint8 pct)
 {
-    if (pct == config.pwm_percent_max2)
+    if (pct == pid.pwm_percent_max2)
         return;
 
-    config.pwm_percent_max2 = pct;
+    pid.pwm_percent_max2 = pct;
     emit percentMax2Changed();
 }
 
 void BackEndPID::setSetpoint(const qreal &setpoint)
 {
-    if (isApproximatelyEqual(static_cast<float>(setpoint), config.pid.setpoint))
+    if (isApproximatelyEqual(static_cast<float>(setpoint), pid.setpoint))
         return;
 
-    config.pid.setpoint = static_cast<float>(setpoint);
+    pid.setpoint = static_cast<float>(setpoint);
     emit setpointChanged();
 }
 
 void BackEndPID::setSetpointMin(const qreal &setpointMin)
 {
-    if (isApproximatelyEqual(static_cast<float>(setpointMin), config.pid.setpoint_min))
+    if (isApproximatelyEqual(static_cast<float>(setpointMin), pid.setpoint_min))
         return;
 
-    config.pid.setpoint_min = static_cast<float>(setpointMin);
+    pid.setpoint_min = static_cast<float>(setpointMin);
     emit setpointMinChanged();
 }
 
 void BackEndPID::setSetpointMax(const qreal &setpointMax)
 {
-    if (isApproximatelyEqual(static_cast<float>(setpointMax), config.pid.setpoint_max))
+    if (isApproximatelyEqual(static_cast<float>(setpointMax), pid.setpoint_max))
         return;
 
-    config.pid.setpoint_max = static_cast<float>(setpointMax);
+    pid.setpoint_max = static_cast<float>(setpointMax);
     emit setpointMaxChanged();
 }
 
 void BackEndPID::setGainP(const qreal &gain)
 {
-    if (isApproximatelyEqual(static_cast<float>(gain), static_cast<float>(config.pid.gain_p)))
+    if (isApproximatelyEqual(static_cast<float>(gain), static_cast<float>(pid.gain_p)))
         return;
 
-    config.pid.gain_p = static_cast<uint8_t>(gain);
+    pid.gain_p = static_cast<uint8_t>(gain);
     emit gainPChanged();
 }
 
 void BackEndPID::setGainI(const qreal &gain)
 {
-    if (isApproximatelyEqual(static_cast<float>(gain), config.pid.gain_i))
+    if (isApproximatelyEqual(static_cast<float>(gain), pid.gain_i))
         return;
 
-    config.pid.gain_i = static_cast<float>(gain);
+    pid.gain_i = static_cast<float>(gain);
     emit gainIChanged();
 }
 
 void BackEndPID::setGainD(const qreal &gain)
 {
-    if (isApproximatelyEqual(static_cast<float>(gain), config.pid.gain_d))
+    if (isApproximatelyEqual(static_cast<float>(gain), pid.gain_d))
         return;
 
-    config.pid.gain_d = static_cast<float>(gain);
+    pid.gain_d = static_cast<float>(gain);
     emit gainDChanged();
 }
 
 void BackEndPID::setAdaptiveSP(const bool &adativeSP)
 {
-    if (adativeSP == config.pid.adaptive_sp)
+    if (adativeSP == pid.adaptive_sp)
         return;
 
-    config.pid.adaptive_sp = adativeSP;
+    pid.adaptive_sp = adativeSP;
     emit adaptiveSPChanged();
 }
 
 void BackEndPID::setAdaptiveSPUseCaseTemp(const bool &adativeSPUseCaseTemp)
 {
-    if (adativeSPUseCaseTemp == config.pid.adaptive_sp_check_case_temp)
+    if (adativeSPUseCaseTemp == pid.adaptive_sp_check_case_temp)
         return;
 
-    config.pid.adaptive_sp_check_case_temp = adativeSPUseCaseTemp;
+    pid.adaptive_sp_check_case_temp = adativeSPUseCaseTemp;
     emit adaptiveSPUseCaseTempChanged();
 }
 
 void BackEndPID::setAdaptiveSPStepSize(const qreal &stepSize)
 {
-    if (isApproximatelyEqual(static_cast<float>(stepSize), config.pid.adaptive_sp_step_size))
+    if (isApproximatelyEqual(static_cast<float>(stepSize), pid.adaptive_sp_step_size))
         return;
 
-    config.pid.adaptive_sp_step_size = static_cast<float>(stepSize);
+    pid.adaptive_sp_step_size = static_cast<float>(stepSize);
     emit adaptiveSPStepSizeChanged();
 }
 
@@ -426,7 +426,10 @@ BackEnd::BackEnd(QObject *parent) :
 {
     ctrl = new HID_PnP(parent);
 
-    pidConfig = new BackEndPID(m_config, parent);
+    pid1Config = new BackEndPID(m_config.tempSupply.pid, parent);
+    pid2Config = new BackEndPID(m_config.tempCase.pid, parent);
+    pid3Config = new BackEndPID(m_config.tempAux1.pid, parent);
+    pid4Config = new BackEndPID(m_config.tempAux2.pid, parent);
     fan1Config = new BackEndFan(m_config.fan1, parent);
     fan2Config = new BackEndFan(m_config.fan2, parent);
     fan3Config = new BackEndFan(m_config.fan3, parent);
@@ -437,7 +440,8 @@ BackEnd::BackEnd(QObject *parent) :
     sensor1Config = new BackEndSensor(m_config.tempSupply, parent);
     sensor2Config = new BackEndSensor(m_config.tempReturn, parent);
     sensor3Config = new BackEndSensor(m_config.tempCase, parent);
-    sensor4Config = new BackEndSensor(m_config.tempAux, parent);
+    sensor4Config = new BackEndSensor(m_config.tempAux1, parent);
+//    sensor5Config = new BackEndSensor(m_config.tempAux2, parent);
 
     connect(ctrl, SIGNAL(hid_comm_update(bool, UI_Data)), this, SLOT(update_gui(bool, UI_Data)));
     connect(ctrl, SIGNAL(log_append(bool, QString)), this, SLOT(update_log(bool, QString)));
@@ -456,9 +460,21 @@ BackEnd::~BackEnd()
         delete ctrl;
         ctrl = nullptr;
     }
-    if (pidConfig != nullptr) {
-        delete pidConfig;
-        pidConfig = nullptr;
+    if (pid1Config != nullptr) {
+        delete pid1Config;
+        pid1Config = nullptr;
+    }
+    if (pid2Config != nullptr) {
+        delete pid2Config;
+        pid2Config = nullptr;
+    }
+    if (pid3Config != nullptr) {
+        delete pid3Config;
+        pid3Config = nullptr;
+    }
+    if (pid4Config != nullptr) {
+        delete pid4Config;
+        pid4Config = nullptr;
     }
     if (fan1Config != nullptr) {
         delete fan1Config;
@@ -554,9 +570,21 @@ void BackEnd::update_config(bool isConnected, RuntimeConfig config)
     emit fan6Changed();
 }
 
-BackEndPID* BackEnd::pid()
+BackEndPID* BackEnd::pid1()
 {
-    return pidConfig;
+    return pid1Config;
+}
+BackEndPID* BackEnd::pid2()
+{
+    return pid2Config;
+}
+BackEndPID* BackEnd::pid3()
+{
+    return pid3Config;
+}
+BackEndPID* BackEnd::pid4()
+{
+    return pid4Config;
 }
 
 BackEndFan* BackEnd::fan1()
@@ -641,13 +669,37 @@ qreal BackEnd::fanPercentTbl()
     return m_fanPercentTbl;
 }
 
-void BackEnd::setPid(BackEndPID *pid)
+void BackEnd::setPid1(BackEndPID *pid)
 {
-    if (pid == pidConfig)
+    if (pid == pid1Config)
         return;
 
-    pidConfig = pid;
-    emit pidChanged();
+    pid1Config = pid;
+    emit pid1Changed();
+}
+void BackEnd::setPid2(BackEndPID *pid)
+{
+    if (pid == pid2Config)
+        return;
+
+    pid2Config = pid;
+    emit pid2Changed();
+}
+void BackEnd::setPid3(BackEndPID *pid)
+{
+    if (pid == pid3Config)
+        return;
+
+    pid3Config = pid;
+    emit pid3Changed();
+}
+void BackEnd::setPid4(BackEndPID *pid)
+{
+    if (pid == pid4Config)
+        return;
+
+    pid4Config = pid;
+    emit pid4Changed();
 }
 
 void BackEnd::setFan1(BackEndFan *fan)

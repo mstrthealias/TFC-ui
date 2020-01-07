@@ -139,7 +139,7 @@ signals:
     void adaptiveSPStepDownChanged();
 
 public:
-    explicit BackEndPID(RuntimeConfig &config, QObject *parent = nullptr);
+    explicit BackEndPID(RuntimeConfig::PIDConfig &pid, QObject *parent = nullptr);
     ~BackEndPID();
 
     quint8 percentMin();
@@ -173,7 +173,7 @@ public:
     void setAdaptiveSPStepDown(BackEndPIDStep *step);
 
 private:
-    RuntimeConfig &config;
+    RuntimeConfig::PIDConfig &pid;
 
     BackEndPIDStep *stepUpConfig = nullptr;
     BackEndPIDStep *stepDownConfig = nullptr;
@@ -185,7 +185,10 @@ class BackEnd : public QObject
 {
     Q_OBJECT
     // configuration
-    Q_PROPERTY(BackEndPID* pid READ pid WRITE setPid NOTIFY pidChanged)
+    Q_PROPERTY(BackEndPID* pid1 READ pid1 WRITE setPid1 NOTIFY pid1Changed)
+    Q_PROPERTY(BackEndPID* pid2 READ pid2 WRITE setPid2 NOTIFY pid2Changed)
+    Q_PROPERTY(BackEndPID* pid3 READ pid3 WRITE setPid3 NOTIFY pid3Changed)
+    Q_PROPERTY(BackEndPID* pid4 READ pid4 WRITE setPid4 NOTIFY pid4Changed)
     Q_PROPERTY(BackEndFan* fan1 READ fan1 WRITE setFan1 NOTIFY fan1Changed)
     Q_PROPERTY(BackEndFan* fan2 READ fan2 WRITE setFan2 NOTIFY fan2Changed)
     Q_PROPERTY(BackEndFan* fan3 READ fan3 WRITE setFan3 NOTIFY fan3Changed)
@@ -217,7 +220,10 @@ signals:
     void logAppend(QString log);
     void saveConfig(const RuntimeConfig &config);
 
-    void pidChanged();
+    void pid1Changed();
+    void pid2Changed();
+    void pid3Changed();
+    void pid4Changed();
     void fan1Changed();
     void fan2Changed();
     void fan3Changed();
@@ -245,7 +251,10 @@ public:
 
     Q_INVOKABLE bool save();
 
-    BackEndPID* pid();
+    BackEndPID* pid1();
+    BackEndPID* pid2();
+    BackEndPID* pid3();
+    BackEndPID* pid4();
     BackEndFan* fan1();
     BackEndFan* fan2();
     BackEndFan* fan3();
@@ -266,7 +275,10 @@ public:
     qreal fanPercentPID();
     qreal fanPercentTbl();
 
-    void setPid(BackEndPID *pid);
+    void setPid1(BackEndPID *pid);
+    void setPid2(BackEndPID *pid);
+    void setPid3(BackEndPID *pid);
+    void setPid4(BackEndPID *pid);
     void setFan1(BackEndFan *fan);
     void setFan2(BackEndFan *fan);
     void setFan3(BackEndFan *fan);
@@ -290,7 +302,10 @@ public:
 private:
     HID_PnP *ctrl = nullptr;
 
-    BackEndPID *pidConfig = nullptr;
+    BackEndPID *pid1Config = nullptr;
+    BackEndPID *pid2Config = nullptr;
+    BackEndPID *pid3Config = nullptr;
+    BackEndPID *pid4Config = nullptr;
     BackEndFan *fan1Config = nullptr;
     BackEndFan *fan2Config = nullptr;
     BackEndFan *fan3Config = nullptr;

@@ -61,14 +61,14 @@ ApplicationWindow {
         Column {
             anchors.fill: parent
 
-//            ItemDelegate {
-//                text: qsTr("Present Values")
-//                width: parent.width
-//                onClicked: {
-//                    stackView.push("pv.qml")
-//                    drawer.close()
-//                }
-//            }
+            ItemDelegate {
+                text: qsTr("Present Values")
+                width: parent.width
+                onClicked: {
+                    stackView.push("pv.qml")
+                    drawer.close()
+                }
+            }
             ItemDelegate {
                 text: qsTr("Hardware Setup")
                 width: parent.width
@@ -87,15 +87,15 @@ ApplicationWindow {
                     drawer.close()
                 }
             }
-            ItemDelegate {
-                text: qsTr("Serial Log")
-                width: parent.width
-                onClicked: {
-                    editToolbar.visible = false
-                    stackView.push("log.qml")
-                    drawer.close()
-                }
-            }
+//            ItemDelegate {
+//                text: qsTr("Serial Log")
+//                width: parent.width
+//                onClicked: {
+//                    editToolbar.visible = false
+//                    stackView.push("log.qml")
+//                    drawer.close()
+//                }
+//            }
 //            ItemDelegate {
 //                text: qsTr("Graph")
 //                width: parent.width
@@ -110,7 +110,7 @@ ApplicationWindow {
     StackView {
         id: stackView
         objectName: 'stackView'
-        initialItem: "pv.qml"
+        initialItem: "log.qml"
         anchors.fill: parent
     }
 }

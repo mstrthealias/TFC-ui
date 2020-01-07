@@ -75,6 +75,24 @@ bool HID_PnP::saveConfig(const RuntimeConfig &conf)
     return true;
 }
 
+bool HID_PnP::writeConfigChunk(uint8_t chunk)
+{
+    // first 2 bytes are a signature
+    buf[0] = 0x00;  // report #
+    buf[1] = HID_PAYLOAD_CONFIG1;
+    buf[2] = (HID_PAYLOAD_CONFIG2 + chunk);
+    // place chunk (48 bytes) in HID buffer
+    memcpy((buf + 3), (config_bytes + chunk*CHUNK_SIZE), CHUNK_SIZE);
+    FILL_ZEROS(buf, (CHUNK_SIZE + 3), BUF_SIZE);
+    buf[64] = HID_DOWNLOAD;  // put next state at the end
+    if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
+        closeDevice();
+        ui_data.isConnectedData = false;
+        return false;
+    }
+    return true;
+}
+
 void HID_PnP::pollUSB()
 {
 //    qDebug() << "pollUSB()";
@@ -131,27 +149,27 @@ void HID_PnP::pollUSB()
             return;
         }
 
-        if (buf[0] == HID_PAYLOAD_CONFIG1 && buf[1] == HID_PAYLOAD_CONFIG2) {
-            memset(config_bytes, '\0', CONFIG_BYTES);
-            memcpy(config_bytes, (buf + 2), CHUNK_SIZE);
-            // TODO check next state ?
-//            qDebug() << "Config chunk A downloaded";
-        }
-        else if (buf[0] == HID_PAYLOAD_CONFIG_B1 && buf[1] == HID_PAYLOAD_CONFIG_B2) {
-            memcpy((config_bytes + CHUNK_SIZE), (buf + 2), CHUNK_SIZE);
-            // TODO check next state ?
-//            qDebug() << "Config chunk B downloaded";
-        }
-        else if (buf[0] == HID_PAYLOAD_CONFIG_C1 && buf[1] == HID_PAYLOAD_CONFIG_C2) {
-            memcpy((config_bytes + 2*CHUNK_SIZE), (buf + 2), CONFIG_BYTES - 2*CHUNK_SIZE);
+        if (buf[0] == HID_PAYLOAD_CONFIG1 && buf[1] >= HID_PAYLOAD_CONFIG2 && buf[1] <= HID_PAYLOAD_CONFIG2 + 6) {
+            if (buf[1] == HID_PAYLOAD_CONFIG2)
+                memset(config_bytes, '\0', CONFIG_BYTES);  // zero on first config packet
 
-            ui_data.hasConfigDownloaded = true;
+            if (buf[1] == HID_PAYLOAD_CONFIG2 + 6)
+                memcpy((config_bytes + 6*CHUNK_SIZE), (buf + 2), CONFIG_BYTES - 6*CHUNK_SIZE);
+            else
+                memcpy((config_bytes + (buf[1] - HID_PAYLOAD_CONFIG2) * CHUNK_SIZE), (buf + 2), CHUNK_SIZE);
 
-            config = RuntimeConfig::parse_bytes(config_bytes, CONFIG_BYTES);
+            if (buf[1] == HID_PAYLOAD_CONFIG2 + 6) {
+                ui_data.hasConfigDownloaded = true;
+                config = RuntimeConfig::parse_bytes(config_bytes, CONFIG_BYTES);
 
-            qDebug() << "Config version" << config.config_version << "downloaded";
+                qDebug() << "Config version" << config.config_version << "downloaded";
 
-            hid_config_download(ui_data.isConnectedData, config);
+                hid_config_download(ui_data.isConnectedData, config);
+            }
+            else {
+                // TODO check next state ?
+                qDebug() << "Config chunk" << (buf[1] - HID_PAYLOAD_CONFIG2) << "downloaded";
+            }
         }
         else if (buf[0] == HID_OUT_PAYLOAD_DATA1 && buf[1] == HID_OUT_PAYLOAD_DATA2) {
             uint64_t val = 0;
@@ -213,54 +231,28 @@ void HID_PnP::pollUSB()
               return;  // -1;  // TODO errno
             }
 
-            // first 2 bytes are a signature
+            // write config chunks
+            if (!writeConfigChunk(0))
+                return;  // TODO handle failure
+            if (!writeConfigChunk(1))
+                return;
+            if (!writeConfigChunk(2))
+                return;
+            if (!writeConfigChunk(3))
+                return;
+            if (!writeConfigChunk(4))
+                return;
+            if (!writeConfigChunk(5))
+                return;
+            // write last chunk
             buf[0] = 0x00;  // report #
             buf[1] = HID_PAYLOAD_CONFIG1;
-            buf[2] = HID_PAYLOAD_CONFIG2;
-
-            // place first chunk (48 bytes) in HID buffer
-            memcpy((buf + 3), config_bytes, CHUNK_SIZE);
-
-            FILL_ZEROS(buf, (CHUNK_SIZE + 3), BUF_SIZE);
-            buf[64] = HID_DOWNLOAD;  // put next state at the end
-
-            if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
-                closeDevice();
-                ui_data.isConnectedData = false;
-                return;
-            }
-
-            // first 2 bytes are a signature
-            buf[0] = 0x00;  // report #
-            buf[1] = HID_PAYLOAD_CONFIG_B1;
-            buf[2] = HID_PAYLOAD_CONFIG_B2;
-
-            // place 2nd chunk (48 bytes) in HID buffer
-            memcpy((buf + 3), (config_bytes + CHUNK_SIZE), CHUNK_SIZE);
-
-            FILL_ZEROS(buf, (CHUNK_SIZE + 3), BUF_SIZE);
-            buf[64] = HID_DOWNLOAD;  // put next state at the end
-
-            if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
-                closeDevice();
-                ui_data.isConnectedData = false;
-                return;
-            }
-
-            // first 2 bytes are a signature
-            buf[0] = 0x00;  // report #
-            buf[1] = HID_PAYLOAD_CONFIG_C1;
-            buf[2] = HID_PAYLOAD_CONFIG_C2;
-
+            buf[2] = HID_PAYLOAD_CONFIG2 + 6;
             // place remaining chunk (48 bytes) in HID buffer
-            memcpy((buf + 3), (config_bytes + 2*CHUNK_SIZE), CONFIG_BYTES - 2*CHUNK_SIZE);
-
-            FILL_ZEROS(buf, (CONFIG_BYTES - 2*CHUNK_SIZE + 3), BUF_SIZE);
+            memcpy((buf + 3), (config_bytes + 6*CHUNK_SIZE), CONFIG_BYTES - 6*CHUNK_SIZE);
+            FILL_ZEROS(buf, (CONFIG_BYTES - 6*CHUNK_SIZE + 3), BUF_SIZE);
             buf[64] = HID_DATA;  // put next state at the end
-
-            // zero config_bytes
-            memset(config_bytes, '\0', CONFIG_BYTES);
-
+            memset(config_bytes, '\0', CONFIG_BYTES);  // zero config_bytes
             if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
                 closeDevice();
                 ui_data.isConnectedData = false;

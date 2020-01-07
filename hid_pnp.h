@@ -52,6 +52,7 @@ signals:
 public slots:
     void pollUSB();
     bool saveConfig(const RuntimeConfig &conf);
+    bool writeConfigChunk(uint8_t chunk);
 
 private:
     hid_device *deviceLog = nullptr;
