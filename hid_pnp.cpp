@@ -75,16 +75,25 @@ bool HID_PnP::saveConfig(const RuntimeConfig &conf)
     return true;
 }
 
-bool HID_PnP::writeConfigChunk(uint8_t chunk)
+bool HID_PnP::writeConfigChunk(uint8_t chunk, bool isLast)
 {
     // first 2 bytes are a signature
     buf[0] = 0x00;  // report #
     buf[1] = HID_PAYLOAD_CONFIG1;
     buf[2] = (HID_PAYLOAD_CONFIG2 + chunk);
-    // place chunk (48 bytes) in HID buffer
-    memcpy((buf + 3), (config_bytes + chunk*CHUNK_SIZE), CHUNK_SIZE);
-    FILL_ZEROS(buf, (CHUNK_SIZE + 3), BUF_SIZE);
-    buf[64] = HID_DOWNLOAD;  // put next state at the end
+    // place chunk in HID buffer
+    if (!isLast) {
+        memcpy((buf + 3), (config_bytes + (chunk * CHUNK_SIZE)), CHUNK_SIZE);
+        FILL_ZEROS(buf, (CHUNK_SIZE + 3), BUF_SIZE);
+        buf[64] = HID_DOWNLOAD;  // put next state at the end
+    }
+    else {
+        // last chunk
+        memcpy((buf + 3), (config_bytes + (chunk * CHUNK_SIZE)), CONFIG_BYTES - (chunk * CHUNK_SIZE));
+        FILL_ZEROS(buf, (CONFIG_BYTES - (chunk * CHUNK_SIZE) + 3), BUF_SIZE);
+        buf[64] = HID_DATA;  // put next state at the end
+        memset(config_bytes, '\0', CONFIG_BYTES);  // zero config_bytes
+    }
     if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
         closeDevice();
         ui_data.isConnectedData = false;
@@ -149,26 +158,30 @@ void HID_PnP::pollUSB()
             return;
         }
 
-        if (buf[0] == HID_PAYLOAD_CONFIG1 && buf[1] >= HID_PAYLOAD_CONFIG2 && buf[1] <= HID_PAYLOAD_CONFIG2 + 6) {
-            if (buf[1] == HID_PAYLOAD_CONFIG2)
+        if (buf[0] == HID_PAYLOAD_CONFIG1 && buf[1] >= HID_PAYLOAD_CONFIG2 && buf[1] < HID_PAYLOAD_CONFIG2 + CHUNK_CNT) {
+            // Remote is sending configuration payload chunk n
+            // TODO state ?
+            uint8_t chunk = buf[1] - HID_PAYLOAD_CONFIG2;
+
+            qDebug() << "Config chunk" << chunk << "downloaded";
+
+            if (chunk == 0)
                 memset(config_bytes, '\0', CONFIG_BYTES);  // zero on first config packet
 
-            if (buf[1] == HID_PAYLOAD_CONFIG2 + 6)
-                memcpy((config_bytes + 6*CHUNK_SIZE), (buf + 2), CONFIG_BYTES - 6*CHUNK_SIZE);
-            else
-                memcpy((config_bytes + (buf[1] - HID_PAYLOAD_CONFIG2) * CHUNK_SIZE), (buf + 2), CHUNK_SIZE);
+            if (chunk < CHUNK_CNT - 1) {
+                // first or middle chunk
+                memcpy((config_bytes + (chunk * CHUNK_SIZE)), (buf + 2), CHUNK_SIZE);
+            }
+            else {
+                // last chunk
+                memcpy((config_bytes + (chunk * CHUNK_SIZE)), (buf + 2), CONFIG_BYTES - (chunk * CHUNK_SIZE));
 
-            if (buf[1] == HID_PAYLOAD_CONFIG2 + 6) {
                 ui_data.hasConfigDownloaded = true;
                 config = RuntimeConfig::parse_bytes(config_bytes, CONFIG_BYTES);
 
                 qDebug() << "Config version" << config.config_version << "downloaded";
 
                 hid_config_download(ui_data.isConnectedData, config);
-            }
-            else {
-                // TODO check next state ?
-                qDebug() << "Config chunk" << (buf[1] - HID_PAYLOAD_CONFIG2) << "downloaded";
             }
         }
         else if (buf[0] == HID_OUT_PAYLOAD_DATA1 && buf[1] == HID_OUT_PAYLOAD_DATA2) {
@@ -232,31 +245,9 @@ void HID_PnP::pollUSB()
             }
 
             // write config chunks
-            if (!writeConfigChunk(0))
-                return;  // TODO handle failure
-            if (!writeConfigChunk(1))
-                return;
-            if (!writeConfigChunk(2))
-                return;
-            if (!writeConfigChunk(3))
-                return;
-            if (!writeConfigChunk(4))
-                return;
-            if (!writeConfigChunk(5))
-                return;
-            // write last chunk
-            buf[0] = 0x00;  // report #
-            buf[1] = HID_PAYLOAD_CONFIG1;
-            buf[2] = HID_PAYLOAD_CONFIG2 + 6;
-            // place remaining chunk (48 bytes) in HID buffer
-            memcpy((buf + 3), (config_bytes + 6*CHUNK_SIZE), CONFIG_BYTES - 6*CHUNK_SIZE);
-            FILL_ZEROS(buf, (CONFIG_BYTES - 6*CHUNK_SIZE + 3), BUF_SIZE);
-            buf[64] = HID_DATA;  // put next state at the end
-            memset(config_bytes, '\0', CONFIG_BYTES);  // zero config_bytes
-            if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
-                closeDevice();
-                ui_data.isConnectedData = false;
-                return;
+            for (uint8_t chunk = 0; chunk < CHUNK_CNT; chunk++) {
+                if (!writeConfigChunk(chunk, chunk == CHUNK_CNT - 1))
+                    return;  // TODO handle failure
             }
 
             qDebug() << "Config saved";
