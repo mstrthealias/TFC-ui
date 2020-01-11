@@ -71,9 +71,10 @@ void BackEndFan::setMode(const quint8 &mode)
 {
     if (mode == static_cast<quint8>(fanConfig.mode))
         return;
+    else if (mode > 3)
+        return;
 
-    fanConfig.mode = mode == 0 ? CONTROL_MODE::MODE_TBL
-                                   : CONTROL_MODE::MODE_PID;
+    fanConfig.mode = static_cast<CONTROL_MODE>(mode);
     emit modeChanged();
 }
 void BackEndFan::setRatio(const qreal &ratio)
