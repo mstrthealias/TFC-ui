@@ -7,7 +7,7 @@ Item {
     property var fan
 
     width: 260
-    height: 140
+    height: 80
 
     Text {
         text: title
@@ -22,7 +22,7 @@ Item {
         x: 0
         y: 20
         width: 240
-        height: 100
+        height: 60
         columns: 2
 
         TextField {
@@ -65,45 +65,5 @@ Item {
             }
         }
 
-        TextField {
-            id: fieldMode
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("Control Mode")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Fan Control Mode: 1 for PID, 0 for %-table.")
-            }
-            text: fan.mode
-
-            Binding {
-                target: fan; property: "mode"; value: fieldMode.text
-            }
-        }
-
-        TextField {
-            id: fieldRatio
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("Ratio")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Fan Ratio: set a value less than 1 to reduce this fan's speed, set a value greater than 1 to increase this fan's speed. Note: fan ratio is applied after PID and %-table calculations.")
-            }
-            text: fan.ratio
-
-            Binding {
-                target: fan; property: "ratio"; value: fieldRatio.text
-            }
-        }
     }
-
 }

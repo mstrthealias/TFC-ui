@@ -13,15 +13,21 @@ class BackEndFan : public QObject
     Q_PROPERTY(quint8 pinPWM READ pinPWM WRITE setPinPWM NOTIFY pinPWMChanged)
     Q_PROPERTY(quint8 pinRPM READ pinRPM WRITE setPinRPM NOTIFY pinRPMChanged)
     Q_PROPERTY(quint8 mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(quint8 source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(qreal ratio READ ratio WRITE setRatio NOTIFY ratioChanged)
     Q_PROPERTY(quint16 rpm READ rpm WRITE setRpm NOTIFY rpmChanged)
+
+    Q_PROPERTY(QVariantList tbl READ tbl WRITE setTbl NOTIFY tblChanged)
+
 
 signals:
     void pinPWMChanged();
     void pinRPMChanged();
     void modeChanged();
+    void sourceChanged();
     void ratioChanged();
     void rpmChanged();
+    void tblChanged();
 
 public:
     explicit BackEndFan(RuntimeConfig::FanConfig &fanConfig, QObject *parent = nullptr);
@@ -29,18 +35,23 @@ public:
     quint8 pinPWM();
     quint8 pinRPM();
     quint8 mode();
+    quint8 source();
     qreal ratio();
     quint16 rpm();
+    const QVariantList& tbl();
 
     void setPinPWM(const quint8 &pinPWM);
     void setPinRPM(const quint8 &pinRPM);
     void setMode(const quint8 &mode);
+    void setSource(const quint8 &source);
     void setRatio(const qreal &ratio);
     void setRpm(const quint16 rpm);
+    void setTbl(const QVariantList &tbl);
 
 private:
     RuntimeConfig::FanConfig &fanConfig;
     quint16 m_rpm = 0;
+    QVariantList pctTbl;
 };
 
 

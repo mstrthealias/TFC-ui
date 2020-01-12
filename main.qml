@@ -5,8 +5,8 @@ import BackEnd 1.0
 ApplicationWindow {
     id: window
     visible: true
-    width: 640
-    height: 600
+    width: 1200
+    height: 800
     title: qsTr("Teensy Fan Controller")
 
     BackEnd {
@@ -66,6 +66,15 @@ ApplicationWindow {
                 width: parent.width
                 onClicked: {
                     stackView.push("pv.qml")
+                    drawer.close()
+                }
+            }
+            ItemDelegate {
+                text: qsTr("Fan Setup")
+                width: parent.width
+                onClicked: {
+                    editToolbar.visible = true
+                    stackView.push("fans.qml")
                     drawer.close()
                 }
             }

@@ -1,6 +1,6 @@
-#include "back_end.h"
 #include <cmath>
-
+#include <QJsonObject>
+#include "back_end.h"
 
 // https://stackoverflow.com/a/41405501/1345237
 //implements relative method - do not use for comparing with zero
@@ -25,7 +25,7 @@ static inline qreal toReal(TFloat a, TMulti multi = 10000)
 
 
 BackEndFan::BackEndFan(RuntimeConfig::FanConfig &fanConfig, QObject *parent) :
-    QObject(parent), fanConfig(fanConfig)
+    QObject(parent), fanConfig(fanConfig), pctTbl()
 {
 }
 
@@ -41,6 +41,10 @@ quint8 BackEndFan::mode()
 {
     return static_cast<quint8>(fanConfig.mode);
 }
+quint8 BackEndFan::source()
+{
+    return static_cast<quint8>(fanConfig.source);
+}
 qreal BackEndFan::ratio()
 {
     return toReal(fanConfig.ratio);
@@ -49,6 +53,20 @@ qreal BackEndFan::ratio()
 quint16 BackEndFan::rpm()
 {
     return m_rpm;
+}
+
+const QVariantList& BackEndFan::tbl()
+{
+    pctTbl.clear();
+    const auto &pctTable = fanConfig.tbl.temp_pct_table;
+    uint8_t i;
+    for (i = 0; i < 10; i++) {
+        pctTbl.append(QJsonObject{
+                          {"temp", static_cast<qreal>(pctTable[i][0])},
+                          {"pct", static_cast<qreal>(pctTable[i][1])}
+                      });
+    }
+    return pctTbl;
 }
 
 void BackEndFan::setPinPWM(const quint8 &pinPWM)
@@ -77,6 +95,22 @@ void BackEndFan::setMode(const quint8 &mode)
     fanConfig.mode = static_cast<CONTROL_MODE>(mode);
     emit modeChanged();
 }
+void BackEndFan::setSource(const quint8 &source)
+{
+    if (source == static_cast<quint8>(fanConfig.source)) {
+        return;
+    }
+    else if (source > 5) {
+        return;
+    }
+    else if (fanConfig.mode == CONTROL_MODE::MODE_PID && source != 0 && source != 2 && source != 3 && source != 4) {
+        emit sourceChanged();  // force Combo to display original source
+        return;
+    }
+
+    fanConfig.source = static_cast<CONTROL_SOURCE>(source);
+    emit sourceChanged();
+}
 void BackEndFan::setRatio(const qreal &ratio)
 {
     if (isApproximatelyEqual(static_cast<float>(ratio), fanConfig.ratio))
@@ -95,6 +129,25 @@ void BackEndFan::setRpm(const quint16 rpm)
     emit rpmChanged();
 }
 
+void BackEndFan::setTbl(const QVariantList &tbl)
+{
+    uint8_t i = 0;
+    for (QVariantList::iterator j = pctTbl.begin(); j != pctTbl.end(); j++) {
+        if (i > 9)
+            break;
+        fanConfig.tbl.temp_pct_table[i][0] = static_cast<float>(j->value<QJsonObject>().value("temp").toDouble());
+        fanConfig.tbl.temp_pct_table[i][1] = static_cast<float>(j->value<QJsonObject>().value("pct").toDouble());
+        i++;
+    }
+    uint8_t k;
+    for (k = i; k < 10; k++) {
+        fanConfig.tbl.temp_pct_table[k][0] = fanConfig.tbl.temp_pct_table[i - 1][0];
+        fanConfig.tbl.temp_pct_table[k][1] = fanConfig.tbl.temp_pct_table[i - 1][1];
+    }
+
+    pctTbl = tbl;
+    emit tblChanged();
+}
 
 
 BackEndSensor::BackEndSensor(RuntimeConfig::SensorConfig &sensorConfig, QObject *parent) :
