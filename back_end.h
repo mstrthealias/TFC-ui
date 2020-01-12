@@ -199,6 +199,7 @@ class BackEnd : public QObject
     Q_PROPERTY(BackEndSensor* sensor2 READ sensor2 WRITE setSensor2 NOTIFY sensor2Changed)
     Q_PROPERTY(BackEndSensor* sensor3 READ sensor3 WRITE setSensor3 NOTIFY sensor3Changed)
     Q_PROPERTY(BackEndSensor* sensor4 READ sensor4 WRITE setSensor4 NOTIFY sensor4Changed)
+    Q_PROPERTY(BackEndSensor* sensor5 READ sensor5 WRITE setSensor5 NOTIFY sensor5Changed)
 
     // present values
     Q_PROPERTY(qreal setpoint READ setpoint WRITE setSetpoint NOTIFY setpointChanged)
@@ -234,6 +235,7 @@ signals:
     void sensor2Changed();
     void sensor3Changed();
     void sensor4Changed();
+    void sensor5Changed();
 
     void setpointChanged();
     void supplyTempChanged();
@@ -265,6 +267,7 @@ public:
     BackEndSensor* sensor2();
     BackEndSensor* sensor3();
     BackEndSensor* sensor4();
+    BackEndSensor* sensor5();
 
     qreal setpoint();
     qreal supplyTemp();
@@ -289,6 +292,7 @@ public:
     void setSensor2(BackEndSensor *sensor);
     void setSensor3(BackEndSensor *sensor);
     void setSensor4(BackEndSensor *sensor);
+    void setSensor5(BackEndSensor *sensor);
 
     void setSetpoint(const qreal &setpoint);
     void setSupplyTemp(const qreal &supplyTemp);
@@ -316,6 +320,7 @@ private:
     BackEndSensor *sensor2Config = nullptr;
     BackEndSensor *sensor3Config = nullptr;
     BackEndSensor *sensor4Config = nullptr;
+    BackEndSensor *sensor5Config = nullptr;
 
     qreal m_setpoint = 0.0;
     qreal m_supplyTemp = 0.0;

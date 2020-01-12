@@ -32,8 +32,15 @@ Page {
                 sensor: backEnd.sensor3
             }
             HardwareSensor {
-                title: qsTr("Aux Temp Sensor")
+                title: qsTr("Aux1 Temp Sensor")
                 sensor: backEnd.sensor4
+            }
+            HardwareSensor {
+                title: qsTr("Aux2 Temp Sensor")
+                sensor: backEnd.sensor5
+            }
+            Item {
+                width: 50
             }
 
             HardwareFan {
@@ -62,5 +69,4 @@ Page {
             }
         }
     }
-
 }

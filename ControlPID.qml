@@ -38,7 +38,7 @@ Item {
                 visible: parent.hovered
                 text: qsTr("The minimum % the PID is allowed to output.")
             }
-            text: pid.percentMin
+            text: pid ? pid.percentMin : 0
 
             Binding {
                 target: pid; property: "percentMin"; value: fieldPercentMin.text
@@ -56,7 +56,7 @@ Item {
                 visible: parent.hovered
                 text: qsTr("The maximum % the PID is allowed to output, when setpoint < setpoint_max and the setpoint may step up.")
             }
-            text: pid.percentMax1
+            text: pid ? pid.percentMax1 : 0
 
             Binding {
                 target: pid; property: "percentMax1"; value: fieldPercentMax1.text
@@ -74,7 +74,7 @@ Item {
                 visible: parent.hovered
                 text: qsTr("The maximum % the PID is allowed to output, when setpoint = setpoint_max or the setpoint is not allowed to step up (due to case temp delta).")
             }
-            text: pid.percentMax2
+            text: pid ? pid.percentMax2 : 0
 
             Binding {
                 target: pid; property: "percentMax2"; value: fieldPercentMax2.text
@@ -102,7 +102,7 @@ Item {
 //                        visible: parent.hovered
 //                        text: qsTr("Water supply temperature setpoint.")
 //                    }
-            text: pid.setpoint
+            text: pid ? pid.setpoint : 0
 
             Binding {
                 target: pid; property: "setpoint"; value: fieldSetpoint.text
@@ -111,7 +111,7 @@ Item {
         CheckBox {
             id: fieldAdaptiveSP
             text: qsTr("Automatically Adjust (Setpoint Reset)")
-            checked: pid.adaptiveSP
+            checked: pid ? pid.adaptiveSP : 0
 
             Binding {
                 target: pid; property: "adaptiveSP"; value: fieldAdaptiveSP.checked
@@ -134,7 +134,7 @@ Item {
             Label {
                 text: qsTr("Gain (P)")
             }
-            text: pid.gainP
+            text: pid ? pid.gainP : 0
 
             Binding {
                 target: pid; property: "gainP"; value: fieldGainP.text
@@ -148,7 +148,7 @@ Item {
             Label {
                 text: qsTr("Gain (I)")
             }
-            text: pid.gainI
+            text: pid ? pid.gainI : 0
 
             Binding {
                 target: pid; property: "gainI"; value: fieldGainI.text
@@ -162,7 +162,7 @@ Item {
             Label {
                 text: qsTr("Gain (D)")
             }
-            text: pid.gainD
+            text: pid ? pid.gainD : 0
 
             Binding {
                 target: pid; property: "gainD"; value: fieldGainD.text
@@ -200,7 +200,7 @@ Item {
                 Label {
                     text: qsTr("Setpoint Min (degC)")
                 }
-                text: pid.setpointMin
+                text: pid ? pid.setpointMin : 0
 
                 Binding {
                     target: pid; property: "setpointMin"; value: fieldSetpointMin.text
@@ -214,7 +214,7 @@ Item {
                 Label {
                     text: qsTr("Setpoint Max (degC)")
                 }
-                text: pid.setpointMax
+                text: pid ? pid.setpointMax : 0
 
                 Binding {
                     target: pid; property: "setpointMax"; value: fieldSetpointMax.text
@@ -228,7 +228,7 @@ Item {
                 Label {
                     text: qsTr("Step Size (degC)")
                 }
-                text: pid.adaptiveSPStepSize
+                text: pid ? pid.adaptiveSPStepSize : 0
 
                 Binding {
                     target: pid; property: "adaptiveSPStepSize"; value: fieldStepSize.text
@@ -246,7 +246,7 @@ Item {
             CheckBox {
                 id: fieldUseCaseTemp
                 text: qsTr("Use Case Temp")
-                checked: pid.adaptiveSPUseCaseTemp
+                checked: pid ? pid.adaptiveSPUseCaseTemp : 0
 
                 Binding {
                     target: pid; property: "adaptiveSPUseCaseTemp"; value: fieldUseCaseTemp.checked
@@ -261,7 +261,7 @@ Item {
                 Label {
                     text: qsTr("Step-Up If Fan % Above (%)")
                 }
-                text: pid.adaptiveSPStepUp.pct
+                text: pid ? pid.adaptiveSPStepUp.pct : 0
 
                 Binding {
                     target: pid.adaptiveSPStepUp; property: "pct"; value: fieldStepUpPct.text
@@ -275,7 +275,7 @@ Item {
                 Label {
                     text: qsTr("For (seconds)")
                 }
-                text: pid.adaptiveSPStepUp.delay
+                text: pid ? pid.adaptiveSPStepUp.delay : 0
 
                 Binding {
                     target: pid.adaptiveSPStepUp; property: "delay"; value: fieldStepUpDelay.text
@@ -290,7 +290,7 @@ Item {
                 Label {
                     text: qsTr("And Case Temp Delta Below (degC)")
                 }
-                text: pid.adaptiveSPStepUp.caseTempDelta
+                text: pid ? pid.adaptiveSPStepUp.caseTempDelta : 0
 
                 Binding {
                     target: pid.adaptiveSPStepUp; property: "caseTempDelta"; value: fieldStepUpCaseTempDelta.text
@@ -311,7 +311,7 @@ Item {
                 Label {
                     text: qsTr("Step-Down If Fan % Below (%)")
                 }
-                text: pid.adaptiveSPStepDown.pct
+                text: pid ? pid.adaptiveSPStepDown.pct : 0
 
                 Binding {
                     target: pid.adaptiveSPStepDown; property: "pct"; value: fieldStepDownPct.text
@@ -325,7 +325,7 @@ Item {
                 Label {
                     text: qsTr("For (seconds)")
                 }
-                text: pid.adaptiveSPStepDown.delay
+                text: pid ? pid.adaptiveSPStepDown.delay : 0
 
                 Binding {
                     target: pid.adaptiveSPStepDown; property: "delay"; value: fieldStepDownDelay.text
@@ -340,7 +340,7 @@ Item {
                 Label {
                     text: qsTr("And Case Temp Delta Above (degC)")
                 }
-                text: pid.adaptiveSPStepDown.caseTempDelta
+                text: pid ? pid.adaptiveSPStepDown.caseTempDelta : 0
 
                 Binding {
                     target: pid.adaptiveSPStepDown; property: "caseTempDelta"; value: fieldStepDownCaseTempDelta.text

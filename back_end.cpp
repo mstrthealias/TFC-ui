@@ -442,7 +442,7 @@ BackEnd::BackEnd(QObject *parent) :
     sensor2Config = new BackEndSensor(m_config.tempReturn, parent);
     sensor3Config = new BackEndSensor(m_config.tempCase, parent);
     sensor4Config = new BackEndSensor(m_config.tempAux1, parent);
-//    sensor5Config = new BackEndSensor(m_config.tempAux2, parent);
+    sensor5Config = new BackEndSensor(m_config.tempAux2, parent);
 
     connect(ctrl, SIGNAL(hid_comm_update(bool, UI_Data)), this, SLOT(update_gui(bool, UI_Data)));
     connect(ctrl, SIGNAL(log_append(bool, QString)), this, SLOT(update_log(bool, QString)));
@@ -516,6 +516,10 @@ BackEnd::~BackEnd()
     if (sensor4Config != nullptr) {
         delete sensor4Config;
         sensor4Config = nullptr;
+    }
+    if (sensor5Config != nullptr) {
+        delete sensor5Config;
+        sensor5Config = nullptr;
     }
 }
 
@@ -628,6 +632,10 @@ BackEndSensor* BackEnd::sensor3()
 BackEndSensor* BackEnd::sensor4()
 {
     return sensor4Config;
+}
+BackEndSensor* BackEnd::sensor5()
+{
+    return sensor5Config;
 }
 
 qreal BackEnd::setpoint()
@@ -773,6 +781,13 @@ void BackEnd::setSensor4(BackEndSensor *sensor)
         return;
     sensor4Config = sensor;
     emit sensor4Changed();
+}
+void BackEnd::setSensor5(BackEndSensor *sensor)
+{
+    if (sensor == sensor5Config)
+        return;
+    sensor5Config = sensor;
+    emit sensor5Changed();
 }
 
 void BackEnd::setSetpoint(const qreal &setpoint)
