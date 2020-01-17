@@ -4,7 +4,9 @@
 #include <QDebug>
 
 
-static hid_device *hid_open_usage(unsigned short vendor_id, unsigned short product_id, unsigned short usage_page, unsigned short usage)
+//static hid_device *hid_open_usage(unsigned short vendor_id, unsigned short product_id, unsigned short usage_page, unsigned short usage)
+
+static hid_device *hid_open_interface(unsigned short vendor_id, unsigned short product_id, int interface_number)
 {
     struct hid_device_info *devs, *cur_dev;
     const char *path_to_open = nullptr;
@@ -15,8 +17,8 @@ static hid_device *hid_open_usage(unsigned short vendor_id, unsigned short produ
     while (cur_dev) {
         if (cur_dev->vendor_id == vendor_id &&
             cur_dev->product_id == product_id) {
-            if (usage_page && usage) {
-                if (cur_dev->usage_page == usage_page && cur_dev->usage == usage) {
+            if (interface_number >= 0) {
+                if (cur_dev->interface_number == interface_number) {
                     path_to_open = cur_dev->path;
                     break;
                 }
@@ -108,8 +110,8 @@ void HID_PnP::pollUSB()
     memset(buf, 0x00, sizeof(buf));
 
     if (ui_data.isConnectedLog == false) {
-        deviceLog = hid_open_usage(0x16C0, 0x0486, 0xFFC9, 0x0004);  // Serial log
-//        deviceLog = hid_open_usage(0x16C0, 0x0486, 0x2f30, 0x3030);  // Serial log -- Linux HIDRAW??
+        deviceLog = hid_open_interface(0x16C0, 0x0486, 1);
+        //deviceLog = hid_open_usage(0x16C0, 0x0486, 0xFFC9, 0x0004);  // HIDAPI Linux does not support usage/usage_page
         if (deviceLog) {
             qDebug() << "HID Log connected";
             ui_data.isConnectedLog = true;
@@ -122,8 +124,8 @@ void HID_PnP::pollUSB()
         }
     }
     if (ui_data.isConnectedData == false) {
-        deviceData = hid_open_usage(0x16C0, 0x0486, 0xFFAB, 0x0200);  // USB RAW
-//        deviceData = hid_open_usage(0x16C0, 0x0486, 0x67, 0x65);  // USB RAW -- Linux HIDRAW??
+        deviceData = hid_open_interface(0x16C0, 0x0486, 0);
+        //deviceData = hid_open_usage(0x16C0, 0x0486, 0xFFAB, 0x0200);  // HIDAPI Linux does not support usage/usage_page
         if (deviceData) {
             qDebug() << "HID Data connected";
             ui_data.isConnectedData = true;
@@ -196,16 +198,20 @@ void HID_PnP::pollUSB()
             ui_data.caseTemp = val/1000.0;
 
             memcpy(&val, (buf + 14), 4);
-            ui_data.auxTemp = val/1000.0;
+            ui_data.aux1Temp = val/1000.0;
 
             memcpy(&val, (buf + 18), 4);
-            ui_data.deltaT = val/1000.0;
+            ui_data.aux2Temp = val/1000.0;
 
             memcpy(&val, (buf + 22), 4);
-            ui_data.fanPercentPID = val/1000.0;
+            ui_data.deltaT = val/1000.0;
 
-            memcpy(&val, (buf + 26), 4);
-            ui_data.fanPercentTbl = val/1000.0;
+//            memcpy(&val, (buf + 22), 4);
+//            ui_data.fanPercentPID = val/1000.0;
+            ui_data.fanPercentPID = 0;
+//            memcpy(&val, (buf + 26), 4);
+//            ui_data.fanPercentTbl = val/1000.0;
+            ui_data.fanPercentTbl = 0;
 
             memcpy(&val, (buf + 30), 4);
             ui_data.setpoint = val/1000.0;

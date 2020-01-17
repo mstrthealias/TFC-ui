@@ -87,15 +87,6 @@ ApplicationWindow {
                     drawer.close()
                 }
             }
-            ItemDelegate {
-                text: qsTr("PID Setup")
-                width: parent.width
-                onClicked: {
-                    editToolbar.visible = true
-                    stackView.push("pid.qml")
-                    drawer.close()
-                }
-            }
 //            ItemDelegate {
 //                text: qsTr("Serial Log")
 //                width: parent.width

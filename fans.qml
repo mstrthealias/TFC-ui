@@ -55,120 +55,83 @@ Page {
             }
 
             Page {
+                id: fanPageHolder
                 anchors.margins: 12
                 Layout.alignment: Qt.AlignTop
                 Layout.preferredWidth: 335
                 width: 335
                 height: 400
 
-                Page {
-                    property var pid
-                    property string pidTitle
-
-                    id: pidPage
-                    visible: false
-                    anchors.fill: parent
-
-                    function show(source) {
-                        visible = false
-                        tblPage.visible = false
-                        switch (source) {
-                        case 0:
-                            pidPage.pidTitle = "Supply Temp PID"
-                            pidPage.pid = backEnd.pid1
-                            visible = true
-                            break;
-                        case 2:
-                            pidPage.pidTitle = "Case Temp PID"
-                            pidPage.pid = backEnd.pid2
-                            visible = true
-                            break;
-                        case 3:
-                            pidPage.pidTitle = "Aux1 Temp PID"
-                            pidPage.pid = backEnd.pid3
-                            visible = true
-                            break;
-                        case 4:
-                            pidPage.pidTitle = "Aux2 Temp PID"
-                            pidPage.pid = backEnd.pid4
-                            visible = true
-                            break;
-                        default:
-                            pidPage.pidTitle = "INVALID TEMP SOURCE"
-                            pidPage.pid = undefined
-                            visible = false
-                            break;
-                        }
+                function showPID(source) {
+                    if (!fanStackView.empty)
+                        fanStackView.pop();
+                    let valid = true,
+                        pid, pidTitle;
+                    switch (source) {
+                    case 0:
+                        pidTitle = "Supply Temp PID"
+                        pid = backEnd.pid1
+                        break;
+                    case 2:
+                        pidTitle = "Case Temp PID"
+                        pid = backEnd.pid2
+                        break;
+                    case 3:
+                        pidTitle = "Aux1 Temp PID"
+                        pid = backEnd.pid3
+                        break;
+                    case 4:
+                        pidTitle = "Aux2 Temp PID"
+                        pid = backEnd.pid4
+                        break;
+                    default:
+                        pidTitle = "INVALID TEMP SOURCE"
+                        pid = undefined
+                        valid = false
+                        break;
                     }
-
-                    Text {
-                        text: qsTr("PID Setup")
-                        width: 240
-                        height: 20
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: 14
-                    }
-
-                    ControlPID {
-                        y: 20
-                        title: pidPage.pidTitle
-                        pid: pidPage.pid
-                    }
+                    fanStackView.push("FanPID.qml", {
+                                          pidTitle: pidTitle,
+                                          pid: pid
+                                      })
                 }
 
-                Page {
-                    property var fan
-                    property string tblTitle
+                function showTbl(fan, fanNo) {
+                    if (!fanStackView.empty)
+                        fanStackView.pop();
+                    let prefix = "Fan " + fanNo + ": ",
+                        tblTitle;
+                    switch (fan.source) {
+                    case 0:
+                        tblTitle = prefix + "Supply Temp - % Table"
+                        break;
+                    case 1:
+                        tblTitle = prefix + "Return Temp - % Table"
+                        break;
+                    case 2:
+                        tblTitle = prefix + "Case Temp - % Table"
+                        break;
+                    case 3:
+                        tblTitle = prefix + "Aux1 Temp - % Table"
+                        break;
+                    case 4:
+                        tblTitle = prefix + "Aux2 Temp - % Table"
+                        break;
+                    case 5:
+                        tblTitle = prefix + "DeltaT - % Table"
+                        break;
+                    }
+                    fanStackView.push("FanTable.qml", {
+                                          tblTitle: tblTitle,
+                                          fan: fan
+                                      })
+                    fanStackView.currentItem.load()
+                }
 
-                    id: tblPage
-                    visible: false
+                StackView {
+                    id: fanStackView
+                    objectName: 'fanStackView'
                     anchors.fill: parent
-
-                    function show(source, fan, fanNo) {
-                        visible = false
-                        pidPage.visible = false
-                        let prefix = "Fan " + fanNo + ": "
-                        switch (source) {
-                        case 0:
-                            tblPage.tblTitle = prefix + "Supply Temp - % Table"
-                            break;
-                        case 1:
-                            tblPage.tblTitle = prefix + "Return Temp - % Table"
-                            break;
-                        case 2:
-                            tblPage.tblTitle = prefix + "Case Temp - % Table"
-                            break;
-                        case 3:
-                            tblPage.tblTitle = prefix + "Aux1 Temp - % Table"
-                            break;
-                        case 4:
-                            tblPage.tblTitle = prefix + "Aux2 Temp - % Table"
-                            break;
-                        case 5:
-                            tblPage.tblTitle = prefix + "DeltaT - % Table"
-                            break;
-                        }
-                        tblPage.fan = fan
-                        visible = true
-                        tblView.load()
-                    }
-
-                    Text {
-                        text: qsTr("Table Setup")
-                        width: 240
-                        height: 20
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: 14
-                    }
-
-                    ControlTable {
-                        id: tblView
-                        y: 20
-                        title: tblPage.tblTitle
-                        fan: tblPage.fan
-                    }
                 }
             }
         }

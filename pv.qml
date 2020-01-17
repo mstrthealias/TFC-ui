@@ -70,34 +70,48 @@ Page {
                     readOnly: true
                     text: backEnd.caseTemp
                 }
-                TextField {
-                    Layout.preferredWidth: 135
-                    Layout.minimumWidth: 90
-                    Label {
-                        text: "Aux Temp"
-                    }
-                    readOnly: true
-                    text: backEnd.auxTemp
+                Item {
+                    width: 90
                 }
 
                 TextField {
                     Layout.preferredWidth: 135
                     Layout.minimumWidth: 90
                     Label {
-                        text: "Fan Percent (PID)"
+                        text: "Aux1 Temp"
                     }
                     readOnly: true
-                    text: backEnd.fanPercentPID
+                    text: backEnd.aux1Temp
                 }
+
                 TextField {
                     Layout.preferredWidth: 135
                     Layout.minimumWidth: 90
                     Label {
-                        text: "Fan Percent (%-table)"
+                        text: "Aux2 Temp"
                     }
                     readOnly: true
-                    text: backEnd.fanPercentTbl
+                    text: backEnd.aux2Temp
                 }
+
+//                TextField {
+//                    Layout.preferredWidth: 135
+//                    Layout.minimumWidth: 90
+//                    Label {
+//                        text: "Fan Percent (PID)"
+//                    }
+//                    readOnly: true
+//                    text: backEnd.fanPercentPID
+//                }
+//                TextField {
+//                    Layout.preferredWidth: 135
+//                    Layout.minimumWidth: 90
+//                    Label {
+//                        text: "Fan Percent (%-table)"
+//                    }
+//                    readOnly: true
+//                    text: backEnd.fanPercentTbl
+//                }
             }
 
             GridLayout {

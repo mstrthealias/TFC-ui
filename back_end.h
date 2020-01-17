@@ -217,7 +217,8 @@ class BackEnd : public QObject
     Q_PROPERTY(qreal supplyTemp READ supplyTemp WRITE setSupplyTemp NOTIFY supplyTempChanged)
     Q_PROPERTY(qreal returnTemp READ returnTemp WRITE setReturnTemp NOTIFY returnTempChanged)
     Q_PROPERTY(qreal caseTemp READ caseTemp WRITE setCaseTemp NOTIFY caseTempChanged)
-    Q_PROPERTY(qreal auxTemp READ auxTemp WRITE setAuxTemp NOTIFY auxTempChanged)
+    Q_PROPERTY(qreal aux1Temp READ aux1Temp WRITE setAux1Temp NOTIFY aux1TempChanged)
+    Q_PROPERTY(qreal aux2Temp READ aux2Temp WRITE setAux2Temp NOTIFY aux2TempChanged)
     Q_PROPERTY(qreal deltaT READ deltaT WRITE setDeltaT NOTIFY deltaTChanged)
     Q_PROPERTY(qreal fanPercentPID READ fanPercentPID WRITE setFanPercentPID NOTIFY fanPercentPIDChanged)
     Q_PROPERTY(qreal fanPercentTbl READ fanPercentTbl WRITE setFanPercentTbl NOTIFY fanPercentTblChanged)
@@ -252,7 +253,8 @@ signals:
     void supplyTempChanged();
     void returnTempChanged();
     void caseTempChanged();
-    void auxTempChanged();
+    void aux1TempChanged();
+    void aux2TempChanged();
     void deltaTChanged();
     void fanPercentPIDChanged();
     void fanPercentTblChanged();
@@ -284,7 +286,8 @@ public:
     qreal supplyTemp();
     qreal returnTemp();
     qreal caseTemp();
-    qreal auxTemp();
+    qreal aux1Temp();
+    qreal aux2Temp();
     qreal deltaT();
     qreal fanPercentPID();
     qreal fanPercentTbl();
@@ -309,7 +312,8 @@ public:
     void setSupplyTemp(const qreal &supplyTemp);
     void setReturnTemp(const qreal &returnTemp);
     void setCaseTemp(const qreal &caseTemp);
-    void setAuxTemp(const qreal &auxTemp);
+    void setAux1Temp(const qreal &auxTemp);
+    void setAux2Temp(const qreal &auxTemp);
     void setDeltaT(const qreal &deltaT);
     void setFanPercentPID(const qreal &fanPercent);
     void setFanPercentTbl(const qreal &fanPercent);
@@ -337,7 +341,8 @@ private:
     qreal m_supplyTemp = 0.0;
     qreal m_returnTemp = 0.0;
     qreal m_caseTemp = 0.0;
-    qreal m_auxTemp = 0.0;
+    qreal m_aux1Temp = 0.0;
+    qreal m_aux2Temp = 0.0;
     qreal m_deltaT = 0.0;
     qreal m_fanPercentPID = 0.0;
     qreal m_fanPercentTbl = 0.0;

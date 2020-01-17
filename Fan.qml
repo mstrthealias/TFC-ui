@@ -74,7 +74,7 @@ Item {
                 text: qsTr("Edit Table")
                 font.pixelSize: Qt.application.font.pixelSize
                 onClicked: {
-                    tblPage.show(fan.source, fan, fanNo)
+                    fanPageHolder.showTbl(fan, fanNo)
                 }
             }
 
@@ -84,7 +84,7 @@ Item {
                 text: qsTr("Edit PID")
                 font.pixelSize: Qt.application.font.pixelSize
                 onClicked: {
-                    pidPage.show(fan.source)
+                    fanPageHolder.showPID(fan.source)
                 }
             }
 

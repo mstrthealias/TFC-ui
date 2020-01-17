@@ -30,7 +30,8 @@ class UI_Data
     qreal supplyTemp = 0.0;
     qreal returnTemp = 0.0;
     qreal caseTemp = 0.0;
-    qreal auxTemp = 0.0;
+    qreal aux1Temp = 0.0;
+    qreal aux2Temp = 0.0;
     qreal deltaT = 0.0;
     qreal fanPercentPID = 0.0;
     qreal fanPercentTbl = 0.0;

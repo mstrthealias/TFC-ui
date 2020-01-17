@@ -62,8 +62,8 @@ const QVariantList& BackEndFan::tbl()
     uint8_t i;
     for (i = 0; i < 10; i++) {
         pctTbl.append(QJsonObject{
-                          {"temp", static_cast<qreal>(pctTable[i][0])},
-                          {"pct", static_cast<qreal>(pctTable[i][1])}
+                          {"temp", toReal(pctTable[i][0])},
+                          {"pct", toReal(pctTable[i][1])}
                       });
     }
     return pctTbl;
@@ -132,7 +132,7 @@ void BackEndFan::setRpm(const quint16 rpm)
 void BackEndFan::setTbl(const QVariantList &tbl)
 {
     uint8_t i = 0;
-    for (QVariantList::iterator j = pctTbl.begin(); j != pctTbl.end(); j++) {
+    for (QVariantList::const_iterator j = tbl.begin(); j != tbl.end(); j++) {
         if (i > 9)
             break;
         fanConfig.tbl.temp_pct_table[i][0] = static_cast<float>(j->value<QJsonObject>().value("temp").toDouble());
@@ -589,7 +589,8 @@ void BackEnd::update_gui(bool isConnected, UI_Data ui_data)
     setSupplyTemp(static_cast<const qreal>(ui_data.supplyTemp));
     setReturnTemp(static_cast<const qreal>(ui_data.returnTemp));
     setCaseTemp(static_cast<const qreal>(ui_data.caseTemp));
-    setAuxTemp(static_cast<const qreal>(ui_data.auxTemp));
+    setAux1Temp(static_cast<const qreal>(ui_data.aux1Temp));
+    setAux2Temp(static_cast<const qreal>(ui_data.aux2Temp));
     setDeltaT(static_cast<const qreal>(ui_data.deltaT));
     setSetpoint(static_cast<const qreal>(ui_data.setpoint));
     setFanPercentPID(static_cast<const qreal>(ui_data.fanPercentPID));
@@ -711,9 +712,13 @@ qreal BackEnd::caseTemp()
     return m_caseTemp;
 }
 
-qreal BackEnd::auxTemp()
+qreal BackEnd::aux1Temp()
 {
-    return m_auxTemp;
+    return m_aux1Temp;
+}
+qreal BackEnd::aux2Temp()
+{
+    return m_aux2Temp;
 }
 
 qreal BackEnd::deltaT()
@@ -879,13 +884,21 @@ void BackEnd::setCaseTemp(const qreal &caseTemp)
     emit caseTempChanged();
 }
 
-void BackEnd::setAuxTemp(const qreal &auxTemp)
+void BackEnd::setAux1Temp(const qreal &auxTemp)
 {
-    if (isApproximatelyEqual(auxTemp, m_auxTemp))
+    if (isApproximatelyEqual(auxTemp, m_aux1Temp))
         return;
 
-    m_auxTemp = auxTemp;
-    emit auxTempChanged();
+    m_aux1Temp = auxTemp;
+    emit aux1TempChanged();
+}
+void BackEnd::setAux2Temp(const qreal &auxTemp)
+{
+    if (isApproximatelyEqual(auxTemp, m_aux2Temp))
+        return;
+
+    m_aux2Temp = auxTemp;
+    emit aux2TempChanged();
 }
 
 void BackEnd::setDeltaT(const qreal &deltaT)
