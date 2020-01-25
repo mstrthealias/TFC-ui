@@ -9,6 +9,9 @@ ApplicationWindow {
     height: 800
     title: qsTr("Teensy Fan Controller")
 
+    // triggered when save is clicked; components optionally connected-to for before-save validation
+    signal beforeSave()
+
     BackEnd {
         id: backEnd
         objectName: 'backEnd'
@@ -48,6 +51,7 @@ ApplicationWindow {
             text: qsTr("Save")
             font.pixelSize: Qt.application.font.pixelSize
             onClicked: {
+                window.beforeSave()
                 backEnd.save()
             }
         }
