@@ -144,10 +144,10 @@ Item {
     Text {
         id: titleCmp
         text: title
-        width: 240
-        height: 20
+        width: 405
+        height: 35
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        verticalAlignment: Text.AlignTop
         font.pixelSize: 14
     }
 
@@ -162,6 +162,7 @@ Item {
             TextField {
                 placeholderText: "°C"
                 text: temp
+                width: 195
                 onTextChanged: {
                     if (typeof text !== 'string')
                         return;
@@ -190,6 +191,7 @@ Item {
             TextField {
                 placeholderText: "%"
                 text: pct
+                width: 195
                 inputMask: "000;"
                 inputMethodHints: Qt.ImhDigitsOnly
                 onTextChanged: {
@@ -220,21 +222,27 @@ Item {
         }
     }
 
-    ListView {
-        id: listView
+    Item {
+        id: listViewHolder
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.top: titleCmp.bottom
-        model: tblModel
-        delegate: tblDelegate
+        anchors.bottomMargin: 115
+
+        ListView {
+            anchors.fill: parent
+            model: tblModel
+            delegate: tblDelegate
+        }
     }
+
 
     Button {
         id: addEntryBtn
         text: qsTr("Add")
-        anchors.top: listView.bottom
-        anchors.right: listView.right
+        anchors.top: listViewHolder.bottom
+        anchors.right: listViewHolder.right
         visible: tblModel.count < 10
         onClicked: {
             if (tblModel.count >= 10) {

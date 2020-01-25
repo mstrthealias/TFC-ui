@@ -10,6 +10,69 @@ Item {
     width: 260
     height: 140
 
+    function showFanPID(source, fanNo) {
+        let valid = true,
+            pid, pidTitle;
+        switch (source) {
+        case 0:
+            pidTitle = "Supply Temp PID"
+            pid = backEnd.pid1
+            break;
+        case 2:
+            pidTitle = "Case Temp PID"
+            pid = backEnd.pid2
+            break;
+        case 3:
+            pidTitle = "Aux1 Temp PID"
+            pid = backEnd.pid3
+            break;
+        case 4:
+            pidTitle = "Aux2 Temp PID"
+            pid = backEnd.pid4
+            break;
+        default:
+            pidTitle = "INVALID TEMP SOURCE"
+            pid = undefined
+            valid = false
+            break;
+        }
+        stackView.push("fan_pid.qml", {
+                           fanTitle: qsTr("Fan " + fanNo),
+                           pidTitle: qsTr(pidTitle),
+                           pid: pid
+                       })
+    }
+
+    function showFanTbl(fan, fanNo) {
+        let tblTitle;
+        switch (fan.source) {
+        case 0:
+            tblTitle = "Supply Temp - % Table"
+            break;
+        case 1:
+            tblTitle = "Return Temp - % Table"
+            break;
+        case 2:
+            tblTitle = "Case Temp - % Table"
+            break;
+        case 3:
+            tblTitle = "Aux1 Temp - % Table"
+            break;
+        case 4:
+            tblTitle = "Aux2 Temp - % Table"
+            break;
+        case 5:
+            tblTitle = "DeltaT - % Table"
+            break;
+        }
+        stackView.push("fan_tbl.qml", {
+                           fanTitle: qsTr("Fan " + fanNo),
+                           tblTitle: qsTr(tblTitle),
+                           fan: fan
+                       })
+        stackView.currentItem.load()
+    }
+
     Text {
         text: title
         width: 240
@@ -74,7 +137,7 @@ Item {
                 text: qsTr("Edit Table")
                 font.pixelSize: Qt.application.font.pixelSize
                 onClicked: {
-                    fanPageHolder.showTbl(fan, fanNo)
+                    showFanTbl(fan, fanNo)
                 }
             }
 
@@ -84,7 +147,7 @@ Item {
                 text: qsTr("Edit PID")
                 font.pixelSize: Qt.application.font.pixelSize
                 onClicked: {
-                    fanPageHolder.showPID(fan.source)
+                    showFanPID(fan.source, fanNo)
                 }
             }
 

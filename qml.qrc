@@ -11,7 +11,7 @@
         <file>Fan.qml</file>
         <file>fans.qml</file>
         <file>ControlTable.qml</file>
-        <file>FanPID.qml</file>
-        <file>FanTable.qml</file>
+        <file>fan_pid.qml</file>
+        <file>fan_tbl.qml</file>
     </qresource>
 </RCC>

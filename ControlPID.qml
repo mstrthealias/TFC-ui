@@ -11,10 +11,10 @@ Item {
 
     Text {
         text: title
-        width: 240
-        height: 20
+        width: 405
+        height: 35
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        verticalAlignment: Text.AlignTop
         font.pixelSize: 14
     }
 

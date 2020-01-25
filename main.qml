@@ -5,7 +5,7 @@ import BackEnd 1.0
 ApplicationWindow {
     id: window
     visible: true
-    width: 1200
+    width: 555
     height: 800
     title: qsTr("Teensy Fan Controller")
 
@@ -26,7 +26,8 @@ ApplicationWindow {
             font.pixelSize: Qt.application.font.pixelSize * 1.6
             onClicked: {
                 if (stackView.depth > 1) {
-                    editToolbar.visible = false
+                    if (stackView.depth == 2)
+                        editToolbar.visible = false;
                     stackView.pop()
                 } else {
                     drawer.open()
