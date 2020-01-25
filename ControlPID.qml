@@ -198,7 +198,7 @@ Item {
                 Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
                 Label {
-                    text: qsTr("Setpoint Min (degC)")
+                    text: qsTr("Setpoint Min (°C)")
                 }
                 text: pid ? pid.setpointMin : 0
 
@@ -212,7 +212,7 @@ Item {
                 Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
                 Label {
-                    text: qsTr("Setpoint Max (degC)")
+                    text: qsTr("Setpoint Max (°C)")
                 }
                 text: pid ? pid.setpointMax : 0
 
@@ -226,7 +226,7 @@ Item {
                 Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
                 Label {
-                    text: qsTr("Step Size (degC)")
+                    text: qsTr("Step Size (°C)")
                 }
                 text: pid ? pid.adaptiveSPStepSize : 0
 
@@ -288,7 +288,7 @@ Item {
                 Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
                 Label {
-                    text: qsTr("And Case Temp Delta Below (degC)")
+                    text: qsTr("And Case Temp Delta Below (°C)")
                 }
                 text: pid ? pid.adaptiveSPStepUp.caseTempDelta : 0
 
@@ -338,7 +338,7 @@ Item {
                 Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
                 Label {
-                    text: qsTr("And Case Temp Delta Above (degC)")
+                    text: qsTr("And Case Temp Delta Above (°C)")
                 }
                 text: pid ? pid.adaptiveSPStepDown.caseTempDelta : 0
 

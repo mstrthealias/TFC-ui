@@ -170,9 +170,9 @@ Item {
                         rec;
                     if (text.length && (temp !== 0 || text === '0') && !isNaN(temp)) {
                         if (temp > 131)
-                            temp = 131;  // max temp = 131 degC (2^16/500)
+                            temp = 131;  // max temp = 131 °C (2^16/500)
                         else if (temp < 0)
-                            temp = 0;  // min temp = 0 degC
+                            temp = 0;  // min temp = 0 °C
                         tblModel.setProperty(index, "temp", temp);
 
                         trackTemperatureChange(index);  // track change for validation
