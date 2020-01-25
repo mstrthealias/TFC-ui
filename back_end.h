@@ -230,6 +230,7 @@ public slots:
     void update_config(bool isConnected, RuntimeConfig config);
 
 signals:
+    void hidConnectFailure(bool isDataConnection);
     void logAppend(QString log);
     void saveConfig(const RuntimeConfig &config);
 

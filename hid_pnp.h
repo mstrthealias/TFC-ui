@@ -11,6 +11,7 @@
 
 
 #define BUF_SIZE 65
+#define HID_CONNECT_FAIL_MAX 3
 
 
 class UI_Data
@@ -48,6 +49,7 @@ public:
 signals:
     void hid_config_download(bool isConnected, RuntimeConfig config);
     void hid_comm_update(bool isConnected, UI_Data ui_data);
+    void hid_connect_failure(bool isDataConnection);
     void log_append(bool isConnected, QString str);
 
 public slots:
@@ -66,6 +68,9 @@ private:
 
     UI_Data ui_data;
     RuntimeConfig config;
+
+    uint8_t connectLogErrCnt = 0;
+    uint8_t connectDataErrCnt = 0;
 
     void closeDevice();
 };

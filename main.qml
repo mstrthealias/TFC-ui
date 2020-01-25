@@ -38,6 +38,54 @@ ApplicationWindow {
             text: stackView.currentItem.title
             anchors.centerIn: parent
         }
+
+        Rectangle {
+            id: noDataConnection
+            visible: false
+            height: 25
+            width: Math.max(155, window.width * 0.35)
+            anchors.right: parent.right
+            color: "yellow"
+            border.color: "#b4b4b4"
+            border.width: 1
+            Label {
+                text: qsTr("NO DATA CONNECTION")
+                color: "#333333"
+                anchors.centerIn: parent
+                font.pixelSize: Qt.application.font.pixelSize * 1.4
+            }
+        }
+
+        Rectangle {
+            id: noLogConnection
+            visible: false
+            height: 25
+            width: Math.max(155, window.width * 0.35)
+            anchors.right: parent.right
+            anchors.top: noDataConnection.bottom
+            anchors.topMargin: 5
+            color: "yellow"
+            border.color: "#b4b4b4"
+            border.width: 1
+            Label {
+                text: qsTr("NO LOG CONNECTION")
+                color: "#333333"
+                anchors.centerIn: parent
+                font.pixelSize: Qt.application.font.pixelSize * 1.4
+            }
+        }
+
+        Connections {
+            target: backEnd
+            onHidConnectFailure: function(isDataConnection) {
+                if (isDataConnection) {
+                    noDataConnection.visible = true
+                }
+                else {
+                    noLogConnection.visible = true
+                }
+            }
+        }
     }
 
     footer: ToolBar {
@@ -59,7 +107,7 @@ ApplicationWindow {
 
     Drawer {
         id: drawer
-        width: window.width * 0.66
+        width: Math.max(115, Math.min(window.width * 0.65, 255))
         height: window.height
 
         Column {

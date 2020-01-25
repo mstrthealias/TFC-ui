@@ -28,6 +28,15 @@ Page {
                     serialLogModel.add(str);
                     serialLog.positionViewAtIndex(serialLogModel.rowCount() - 1, ListView.End);
                 }
+                onHidConnectFailure: function(isDataConnection) {
+                    if (isDataConnection) {
+                        serialLogModel.add('Data connection failed');
+                    }
+                    else {
+                        serialLogModel.add('Log connection failed');
+                    }
+                    serialLog.positionViewAtIndex(serialLogModel.rowCount() - 1, ListView.End);
+                }
             }
         }
     }

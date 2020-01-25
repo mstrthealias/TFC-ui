@@ -497,6 +497,8 @@ BackEnd::BackEnd(QObject *parent) :
     sensor4Config = new BackEndSensor(m_config.tempAux1, parent);
     sensor5Config = new BackEndSensor(m_config.tempAux2, parent);
 
+    connect(ctrl, SIGNAL(hid_connect_failure(bool)), this, SIGNAL(hidConnectFailure(bool)));
+
     connect(ctrl, SIGNAL(hid_comm_update(bool, UI_Data)), this, SLOT(update_gui(bool, UI_Data)));
     connect(ctrl, SIGNAL(log_append(bool, QString)), this, SLOT(update_log(bool, QString)));
     connect(ctrl, SIGNAL(hid_config_download(bool, RuntimeConfig)), this, SLOT(update_config(bool, RuntimeConfig)));

@@ -109,32 +109,46 @@ void HID_PnP::pollUSB()
 //    qDebug() << "pollUSB()";
     memset(buf, 0x00, sizeof(buf));
 
-    if (ui_data.isConnectedLog == false) {
+    if (ui_data.isConnectedLog == false && connectLogErrCnt < HID_CONNECT_FAIL_MAX) {
         deviceLog = hid_open_interface(0x16C0, 0x0486, 1);
         //deviceLog = hid_open_usage(0x16C0, 0x0486, 0xFFC9, 0x0004);  // HIDAPI Linux does not support usage/usage_page
         if (deviceLog) {
             qDebug() << "HID Log connected";
             ui_data.isConnectedLog = true;
             hid_set_nonblocking(deviceLog, true);
+            connectLogErrCnt = 0;
             //timer->start(15);
             timer->start(50);
         }
         else {
-            qDebug() << "HID connection failure";
+            if (++connectLogErrCnt >= HID_CONNECT_FAIL_MAX) {
+                qDebug() << "No Log Data connection, all attempts failed";
+                hid_connect_failure(false);
+            }
+            else {
+                qDebug() << "HID Log connection attempt failure";
+            }
         }
     }
-    if (ui_data.isConnectedData == false) {
+    if (ui_data.isConnectedData == false && connectDataErrCnt < HID_CONNECT_FAIL_MAX) {
         deviceData = hid_open_interface(0x16C0, 0x0486, 0);
         //deviceData = hid_open_usage(0x16C0, 0x0486, 0xFFAB, 0x0200);  // HIDAPI Linux does not support usage/usage_page
         if (deviceData) {
             qDebug() << "HID Data connected";
             ui_data.isConnectedData = true;
             hid_set_nonblocking(deviceData, true);
+            connectDataErrCnt = 0;
             //timer->start(15);
             timer->start(50);
         }
         else {
-            qDebug() << "HID connection failure";
+            if (++connectDataErrCnt >= HID_CONNECT_FAIL_MAX) {
+                qDebug() << "No HID Data connection, all attempts failed";
+                hid_connect_failure(true);
+            }
+            else {
+                qDebug() << "HID Data connection attempt failure";
+            }
         }
     }
 
