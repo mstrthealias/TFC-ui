@@ -74,32 +74,32 @@ First, build the static [HIDAPI](https://github.com/mstrthealias/HIDAPI-Qt5) lib
 
 Note: HIDAPI should be cloned into this project's parent directory (or clone the [parent project](https://github.com/mstrthealias/TeensyFanController/) with all submodules).
 
-1. In non-root Shell, add Qt5 to PATH, fe.:
+In non-root Shell, add Qt5 to PATH, fe.:
 
 ```
     PATH=$PATH:~/Qt/5.13.2/gcc_64/bin
     QT_QPA_PLATFORM_PLUGIN_PATH=~/Qt/5.13.2/gcc_64/plugins
 ```
 
-1. Change directory to HIDAPI, fe.:
+Change directory to HIDAPI, fe.:
 
 ```
     cd ~/TeensyFanController/HIDAPI
 ```
 
-1. Run qmake:
+Run qmake:
 
 ```
     qmake
 ```
 
-1. Run make:
+Run make:
 
 ```
     make
 ```
 
-1. Verify libHIDAPI.a was created:
+Verify libHIDAPI.a was created:
 
 ```
     ls linux/libHIDAPI.a
@@ -107,5 +107,26 @@ Note: HIDAPI should be cloned into this project's parent directory (or clone the
 
 Building the Fan Controller UI:
 
-Until the Fan Controller UI's installer is published, it is easiest to run the application using Qt Creator.
+Change directory to HIDAPI, fe.:
 
+```
+    cd ~/TeensyFanController/teensy_fan_controller
+```
+
+Run qmake:
+
+```
+    qmake
+```
+
+Run make:
+
+```
+    make
+```
+
+Launch using `sudo` (note: replace /home/username/Qt/5.13.2 with path to Qt release):
+
+```
+sudo bash -c 'QT_BASE=/home/username/Qt/5.13.2 QML2_IMPORT_PATH="$QT_BASE/gcc_64/qml" QML_IMPORT_PATH="$QT_BASE/gcc_64/qml" QT_QPA_PLATFORM_PLUGIN_PATH="$QT_BASE/gcc_64/plugins"  ./tfctrl'
+```
