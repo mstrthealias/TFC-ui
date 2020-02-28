@@ -259,7 +259,7 @@ void HID_PnP::pollUSB()
             ui_data.pendingConfigUpdate = false;
 
             // copy entire configuration into config_bytes
-            if (config.to_bytes(config_bytes, CONFIG_BYTES) != 0) {
+            if (config.toBytes(config_bytes, CONFIG_BYTES) != 0) {
                 qDebug() << "to_byes ERROR";
               return;  // -1;  // TODO errno
             }

@@ -2,7 +2,7 @@ QT += quick widgets core charts qml
 
 CONFIG += c++11
 
-INCLUDEPATH += ../HIDAPI
+INCLUDEPATH += ../HIDAPI ../nanopb
 
 win32:LIBS += -lhid -lsetupapi -L../HIDAPI/windows -lHIDAPI
 linux:LIBS += -lhidapi-hidraw -L../HIDAPI/linux -lHIDAPI
@@ -19,6 +19,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        ../nanopb/pb_common.c \
+        ../nanopb/pb_decode.c \
+        ../nanopb/pb_encode.c \
+        ../teensy_fan_controller/src/runtime_config_v1.pb.c \
         back_end.cpp \
         hid_pnp.cpp \
         log_list_model.cpp \
