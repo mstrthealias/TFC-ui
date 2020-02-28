@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #include "runtime_config_inc.h"
-#include "../teensy_fan_controller/hid_shared.h"
+#include "../teensy_fan_controller/src/hid_shared.h"
 #include "../HIDAPI/hidapi.h"
 
 
