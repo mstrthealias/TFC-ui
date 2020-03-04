@@ -109,23 +109,63 @@ Item {
             }
 
             ComboBox {
+                property int val: 0
+
                 id: fieldSource
                 visible: fan.mode === 0 || fan.mode === 1
                 Layout.preferredWidth: 275
                 Layout.minimumWidth: 175
+                textRole: "text"
                 currentIndex: fan.source
 
                 model: ListModel {
-                    ListElement { text: qsTr("Water Supply Temp") }
-                    ListElement { text: qsTr("Water Return Temp") }
-                    ListElement { text: qsTr("Case Temp") }
-                    ListElement { text: qsTr("Aux1 Temp") }
-                    ListElement { text: qsTr("Aux2 Temp") }
-                    ListElement { text: qsTr("DeltaT (Return - Supply Temp)"); }
+                    ListElement { val: 0; text: qsTr("Water Supply Temp") }
+                    ListElement { val: 1; text: qsTr("Water Return Temp") }
+                    ListElement { val: 2; text: qsTr("Case Temp") }
+                    ListElement { val: 3; text: qsTr("Aux1 Temp") }
+                    ListElement { val: 4; text: qsTr("Aux2 Temp") }
+                    ListElement { val: 5; text: qsTr("DeltaT (Return - Supply Temp)") }
+                }
+
+                onActivated: {
+                    let rec = fieldSource.model.get(index);
+                    if (rec)
+                        fieldSource.val = rec.val;
+                }
+
+                Component.onCompleted: {
+                    let idx = fieldSource.currentIndex,
+                        mdl = fieldSource.model,
+                        record = mdl.get(idx),
+                        selVal = record ? record.val : 0,  // uses initial ListElements
+                        cur = 0;
+
+                    function appendElement(obj) {
+                        mdl.append({ val: obj.val, text: obj.text });
+                        if (obj.val === selVal)
+                            idx = cur;
+                        cur++;
+                    }
+
+                    mdl.clear();
+                    if (backEnd.sensor1.pin)
+                        appendElement({ val: 0, text: qsTr("Water Supply Temp") });
+                    if (backEnd.sensor2.pin)
+                        appendElement({ val: 1, text: qsTr("Water Return Temp") });
+                    if (backEnd.sensor3.pin)
+                        appendElement({ val: 2, text: qsTr("Case Temp") });
+                    if (backEnd.sensor4.pin)
+                        appendElement({ val: 3, text: qsTr("Aux1 Temp") });
+                    if (backEnd.sensor5.pin)
+                        appendElement({ val: 4, text: qsTr("Aux2 Temp") });
+                    if (backEnd.sensor1.pin && backEnd.sensor2.pin)
+                        appendElement({ val: 5, text: qsTr("DeltaT (Return - Supply Temp)") });
+                    fieldSource.currentIndex = idx;
+                    fieldSource.val = selVal;
                 }
 
                 Binding {
-                    target: fan; property: "source"; value: fieldSource.currentIndex
+                    target: fan; property: "source"; value: fieldSource.val
                 }
             }
         }

@@ -366,6 +366,9 @@ void BackEndPID::setPercentMax1(const quint8 pct)
 
 void BackEndPID::setPercentMax2(const quint8 pct)
 {
+    if (!pid.adaptive_sp)
+        setPercentMax1(pct);  // also set percentMax1 to this pct
+
     if (pct == pid.pwm_percent_max2)
         return;
 

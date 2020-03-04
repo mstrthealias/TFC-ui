@@ -46,6 +46,8 @@ Item {
         }
         TextField {
             id: fieldPercentMax1
+            visible: pid.adaptiveSP
+
 //            Layout.fillWidth: true
             Layout.preferredWidth: 135
             Layout.minimumWidth: 90
