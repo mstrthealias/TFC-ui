@@ -17,12 +17,14 @@ Page {
     ScrollView {
         anchors.fill: parent
 
-        ControlPID {
+        ColumnLayout {
             anchors.fill: parent
             anchors.margins: 12
 
-            title: pidTitle
-            pid: pidPage.pid
+            ControlPID {
+                title: pidTitle
+                pid: pidPage.pid
+            }
         }
     }
 }

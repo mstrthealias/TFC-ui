@@ -21,14 +21,15 @@ Page {
     ScrollView {
         anchors.fill: parent
 
-        ControlTable {
-            id: tblView
-
+        ColumnLayout {
             anchors.fill: parent
             anchors.margins: 12
 
-            title: tblTitle + ' (' + fanTitle + ')'
-            fan: tblPage.fan
+            ControlTable {
+                id: tblView
+                title: tblTitle + ' (' + fanTitle + ')'
+                fan: tblPage.fan
+            }
         }
     }
 }

@@ -11,13 +11,11 @@ Page {
     ScrollView {
         anchors.fill: parent
 
-        GridLayout {
+        ColumnLayout {
             id: fansGrid
 
             anchors.fill: parent
             anchors.margins: 12
-
-            columns: 2
 
             HardwareSensor {
                 title: qsTr("Water Supply Temp Sensor")
@@ -39,8 +37,10 @@ Page {
                 title: qsTr("Aux2 Temp Sensor")
                 sensor: backEnd.sensor5
             }
+
             Item {
-                width: 50
+                height: 24
+                Layout.fillWidth: true
             }
 
             HardwareFan {

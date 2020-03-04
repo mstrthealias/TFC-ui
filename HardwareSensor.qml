@@ -6,38 +6,37 @@ Item {
     property string title
     property var sensor
 
-    width: 260
-    height: 140
+    property int fieldMinWidth: 145
+
+    Layout.fillWidth: true
+    height: 189
 
     Text {
+        id: titleText
         text: title
-        width: 240
-        height: 20
+        height: 40
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 14
+        font.pixelSize: 18
+        font.bold: true
     }
 
     GridLayout {
-        x: 0
-        y: 20
-        width: 240
-        height: 100
+        anchors.top: titleText.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
         columns: 2
 
-        TextField {
+        TextFieldExt {
             id: fieldPin
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("Pin")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Teensy (actual) pin number (must support Analog/ADC).")
-            }
+            minWidth: fieldMinWidth
+            label: qsTr("Pin")
+            tooltip: qsTr("Teensy (actual) pin number (must support Analog/ADC).")
             text: sensor.pin
 
             Binding {
@@ -45,19 +44,11 @@ Item {
             }
         }
 
-        TextField {
+        TextFieldExt {
             id: fieldSeriesR
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("Series Resistor (Ohm)")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Series resistor used to pull-up thermistor, adjust this to calibrate reading. Note: use a 10k resistor for 10k thermistor.")
-            }
+            minWidth: fieldMinWidth
+            label: qsTr("Series Resistor (Ohm)")
+            tooltip: qsTr("Series resistor used to pull-up thermistor, adjust this to calibrate reading. Note: use a 10k resistor for 10k thermistor.")
             text: sensor.seriesR
 
             Binding {
@@ -65,19 +56,11 @@ Item {
             }
         }
 
-        TextField {
+        TextFieldExt {
             id: fieldNominalR
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("Thermistor Nominal Resistance (Ohm)")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Thermistor resistance, usually 10000 (for 10K thermistor).")
-            }
+            minWidth: fieldMinWidth
+            label: qsTr("Thermistor Nominal Resistance (Ohm)")
+            tooltip: qsTr("Thermistor resistance, usually 10000 (for 10K thermistor).")
             text: sensor.nominalR
 
             Binding {
@@ -85,19 +68,11 @@ Item {
             }
         }
 
-        TextField {
+        TextFieldExt {
             id: fieldBeta
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("Thermistor Beta Coefficient")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Thermistor Beta coefficient, usually between 3000-4000.")
-            }
+            minWidth: fieldMinWidth
+            label: qsTr("Thermistor Beta Coefficient")
+            tooltip: qsTr("Thermistor Beta coefficient, usually between 3000-4000.")
             text: sensor.beta
 
             Binding {

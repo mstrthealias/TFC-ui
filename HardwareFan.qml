@@ -6,38 +6,38 @@ Item {
     property string title
     property var fan
 
-    width: 260
-    height: 80
+    property int fieldMinWidth: 115
+
+    Layout.fillWidth: true
+    height: 129
 
     Text {
+        id: titleText
         text: title
-        width: 240
-        height: 20
+        height: 40
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 14
+        font.pixelSize: 18
+        font.bold: true
     }
 
     GridLayout {
-        x: 0
-        y: 20
-        width: 240
-        height: 60
+        anchors.top: titleText.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
         columns: 2
 
-        TextField {
+        TextFieldExt {
             id: fieldPinPWM
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("PWM Pin")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Teensy pin number (must support PWM). Set to 0 if not connected, or to not control fan's PWM signal.")
-            }
+
+            minWidth: fieldMinWidth
+            label: qsTr("PWM Pin")
+            tooltip: qsTr("Teensy pin number (must support PWM). Set to 0 if not connected, or to not control fan's PWM signal.")
             text: fan.pinPWM
 
             Binding {
@@ -45,19 +45,12 @@ Item {
             }
         }
 
-        TextField {
+        TextFieldExt {
             id: fieldPinRPM
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 120
-            Layout.minimumWidth: 90
-            Label {
-                width: 120
-                text: qsTr("RPM Pin")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("Teensy pin number (must support interrupts). Set to 0 if not connected, or to not monitor fan's RPM.")
-            }
+
+            minWidth: fieldMinWidth
+            label: qsTr("RPM Pin")
+            tooltip: qsTr("Teensy pin number (must support interrupts). Set to 0 if not connected, or to not monitor fan's RPM.")
             text: fan.pinRPM
 
             Binding {

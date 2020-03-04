@@ -9,8 +9,8 @@ Item {
     property var pctChanges
     property var tempChanges
 
-    width: 455
-    height: 435
+    Layout.fillWidth: true
+    implicitHeight: titleCmp.height + listViewHolder.height
 
     Connections {
         target: window
@@ -144,11 +144,14 @@ Item {
     Text {
         id: titleCmp
         text: title
-        width: 405
-        height: 35
+        height: 40
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignTop
-        font.pixelSize: 14
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: 18
+        font.bold: true
     }
 
     ListModel {
@@ -157,17 +160,22 @@ Item {
 
     Component {
         id: tblDelegate
-        Row {
+        RowLayout {
+            Layout.fillWidth: true
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 10
-            TextField {
+
+            TextFieldExt {
                 placeholderText: "°C"
+                label: "°C"
                 text: temp
-                width: 195
                 onTextChanged: {
                     if (typeof text !== 'string')
                         return;
                     let temp = Number(text),
-                        rec;
+                    rec;
                     if (text.length && (temp !== 0 || text === '0') && !isNaN(temp)) {
                         if (temp > 131)
                             temp = 131;  // max temp = 131 °C (2^16/500)
@@ -179,26 +187,23 @@ Item {
                     }
                 }
                 onFocusChanged: {
-                    if (focus) {
-                        selectAll();
-                    }
-                    else {
-                        deselect();
+                    if (!focus) {
                         save();  // trigger table validation/update config when focus lost
                     }
                 }
             }
-            TextField {
+
+            TextFieldExt {
                 placeholderText: "%"
+                label: "%"
                 text: pct
-                width: 195
                 inputMask: "000;"
                 inputMethodHints: Qt.ImhDigitsOnly
                 onTextChanged: {
                     if (typeof text !== 'string')
                         return;
                     let pct = Number(text),
-                        rec;
+                    rec;
                     if (text.length && (pct !== 0 || text === '0') && !isNaN(pct)) {
                         if (pct > 100)
                             pct = 100;  // max % = 100
@@ -210,13 +215,9 @@ Item {
                     }
                 }
                 onFocusChanged: {
-                    if (focus) {
-                        selectAll();
+                    if (!focus) {
+                        save();  // trigger table validation/update config when focus lost
                     }
-                    else {
-                        deselect();
-                    }
-                    save();  // trigger table validation/update config when focus lost
                 }
             }
         }
@@ -224,36 +225,43 @@ Item {
 
     Item {
         id: listViewHolder
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+
         anchors.top: titleCmp.bottom
-        anchors.bottomMargin: 115
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: listView.contentHeight + addEntryBtn.height + 25
 
         ListView {
-            anchors.fill: parent
+            id: listView
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            implicitHeight: contentHeight
+            Layout.fillWidth: true
+
             model: tblModel
             delegate: tblDelegate
         }
-    }
 
-
-    Button {
-        id: addEntryBtn
-        text: qsTr("Add")
-        anchors.top: listViewHolder.bottom
-        anchors.right: listViewHolder.right
-        visible: tblModel.count < 10
-        onClicked: {
-            if (tblModel.count >= 10) {
-                console.log('No more rows supported')
-                return;
+        Button {
+            id: addEntryBtn
+            text: qsTr("Add")
+            anchors.top: listView.bottom
+            anchors.right: listView.right
+            visible: tblModel.count < 10
+            onClicked: {
+                if (tblModel.count >= 10) {
+                    console.log('No more rows supported')
+                    return;
+                }
+                let last = tblModel.count ? tblModel.get(tblModel.count - 1) : undefined;
+                tblModel.append({
+                                    temp: last ? last.temp : 25,
+                                    pct: last ? last.pct : 0
+                                });
             }
-            let last = tblModel.count ? tblModel.get(tblModel.count - 1) : undefined;
-            tblModel.append({
-                                temp: last ? last.temp : 25,
-                                pct: last ? last.pct : 0
-                            });
         }
     }
+
 }

@@ -13,5 +13,6 @@
         <file>ControlTable.qml</file>
         <file>fan_pid.qml</file>
         <file>fan_tbl.qml</file>
+        <file>TextFieldExt.qml</file>
     </qresource>
 </RCC>

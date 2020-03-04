@@ -6,76 +6,62 @@ Item {
     property string title
     property var pid
 
-    width: 455
-    height: 435
+    Layout.fillWidth: true
+    height: titleText.implicitHeight + pctGrid.implicitHeight + pidGrid.implicitHeight + gainGrid.implicitHeight + adjPage.implicitHeight + 155
 
     Text {
+        id: titleText
         text: title
-        width: 405
-        height: 35
+        height: 40
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignTop
-        font.pixelSize: 14
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: 18
+        font.bold: true
     }
 
     GridLayout {
         id: pctGrid
-        anchors.top: parent.top
+        anchors.top: titleText.bottom
         anchors.left: parent.left
-        anchors.topMargin: 35
+        anchors.right: parent.right
+        anchors.topMargin: 24
 
         columns: 3
 
-        TextField {
+        TextFieldExt {
             id: fieldPercentMin
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Minimum Fan % (%)")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("The minimum % the PID is allowed to output.")
-            }
+
+            minWidth: 155
+            label: qsTr("Minimum Fan % (%)")
+            tooltip: qsTr("The minimum % the PID is allowed to output.")
             text: pid ? pid.percentMin : 0
 
             Binding {
                 target: pid; property: "percentMin"; value: fieldPercentMin.text
             }
         }
-        TextField {
+        TextFieldExt {
             id: fieldPercentMax1
             visible: pid.adaptiveSP
 
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Maximum Fan % 1 (%)")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("The maximum % the PID is allowed to output, when setpoint < setpoint_max and the setpoint may step up.")
-            }
+            minWidth: 155
+            label: qsTr("Maximum Fan % 1 (%)")
+            tooltip: qsTr("The maximum % the PID is allowed to output, when setpoint < setpoint_max and the setpoint may step up.")
             text: pid ? pid.percentMax1 : 0
 
             Binding {
                 target: pid; property: "percentMax1"; value: fieldPercentMax1.text
             }
         }
-        TextField {
+        TextFieldExt {
             id: fieldPercentMax2
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Maximum Fan % 2 (%)")
-            }
-            ToolTip {
-                visible: parent.hovered
-                text: qsTr("The maximum % the PID is allowed to output, when setpoint = setpoint_max or the setpoint is not allowed to step up (due to case temp delta).")
-            }
+
+            minWidth: 155
+            label: qsTr("Maximum Fan % 2 (%)")
+            tooltip: qsTr("The maximum % the PID is allowed to output, when setpoint = setpoint_max or the setpoint is not allowed to step up (due to case temp delta).")
             text: pid ? pid.percentMax2 : 0
 
             Binding {
@@ -87,23 +73,16 @@ Item {
         id: pidGrid
         anchors.top: pctGrid.bottom
         anchors.left: parent.left
+        anchors.right: parent.right
         anchors.topMargin: 12
 
         columns: 3
 
-        TextField {
+        TextFieldExt {
             id: fieldSetpoint
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Setpoint")
-            }
-//                    // TODO
-//                    ToolTip {
-//                        visible: parent.hovered
-//                        text: qsTr("Water supply temperature setpoint.")
-//                    }
+            Layout.maximumWidth: 115
+
+            label: qsTr("Setpoint")
             text: pid ? pid.setpoint : 0
 
             Binding {
@@ -112,58 +91,51 @@ Item {
         }
         CheckBox {
             id: fieldAdaptiveSP
-            text: qsTr("Automatically Adjust (Setpoint Reset)")
+            Layout.fillWidth: true
+            text: qsTr("Automatically Adjust")
             checked: pid ? pid.adaptiveSP : 0
 
             Binding {
                 target: pid; property: "adaptiveSP"; value: fieldAdaptiveSP.checked
             }
         }
+        Item {
+            Layout.fillWidth: true
+        }
     }
     GridLayout {
         id: gainGrid
         anchors.top: pidGrid.bottom
         anchors.left: parent.left
+        anchors.right: parent.right
         anchors.topMargin: 12
 
         columns: 3
 
-        TextField {
+        TextFieldExt {
             id: fieldGainP
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Gain (P)")
-            }
+
+            label: qsTr("Gain (P)")
             text: pid ? pid.gainP : 0
 
             Binding {
                 target: pid; property: "gainP"; value: fieldGainP.text
             }
         }
-        TextField {
+        TextFieldExt {
             id: fieldGainI
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Gain (I)")
-            }
+
+            label: qsTr("Gain (I)")
             text: pid ? pid.gainI : 0
 
             Binding {
                 target: pid; property: "gainI"; value: fieldGainI.text
             }
         }
-        TextField {
+        TextFieldExt {
             id: fieldGainD
-//            Layout.fillWidth: true
-            Layout.preferredWidth: 135
-            Layout.minimumWidth: 90
-            Label {
-                text: qsTr("Gain (D)")
-            }
+
+            label: qsTr("Gain (D)")
             text: pid ? pid.gainD : 0
 
             Binding {
@@ -172,64 +144,64 @@ Item {
         }
     }
 
-    Page {
+    Item {
+        id: adjPage
+        implicitHeight: subtitleText.height + adjGrid.height + 12
         anchors.top: gainGrid.bottom
         anchors.left: parent.left
-        //anchors.right: parent.right
+        anchors.right: parent.right
         anchors.topMargin: 24
         visible: fieldAdaptiveSP.checked
 
-        header: ToolBar{
-            height: 20
-
-            Label {
-                font.pixelSize: Qt.application.font.pixelSize
-                text: "Setpoint Reset"
-                anchors.centerIn: parent
-            }
+        Text {
+            id: subtitleText
+            text: qsTr("Setpoint Adjustment")
+            height: 33
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 14
+            font.bold: true
         }
 
         GridLayout {
-            anchors.fill: parent
+            id: adjGrid
+            anchors.top: subtitleText.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 12
 
             columns: 3
 
-            TextField {
+            TextFieldExt {
                 id: fieldSetpointMin
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("Setpoint Min (°C)")
-                }
+
+                minWidth: 125
+                label: qsTr("Setpoint Min (°C)")
                 text: pid ? pid.setpointMin : 0
 
                 Binding {
                     target: pid; property: "setpointMin"; value: fieldSetpointMin.text
                 }
             }
-            TextField {
+            TextFieldExt {
                 id: fieldSetpointMax
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("Setpoint Max (°C)")
-                }
+
+                minWidth: 125
+                label: qsTr("Setpoint Max (°C)")
                 text: pid ? pid.setpointMax : 0
 
                 Binding {
                     target: pid; property: "setpointMax"; value: fieldSetpointMax.text
                 }
             }
-            TextField {
+            TextFieldExt {
                 id: fieldStepSize
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("Step Size (°C)")
-                }
+
+                minWidth: 125
+                label: qsTr("Step Size (°C)")
                 text: pid ? pid.adaptiveSPStepSize : 0
 
                 Binding {
@@ -238,11 +210,9 @@ Item {
             }
 
             Item {
-                Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
             }
             Item {
-                Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
             }
             CheckBox {
@@ -255,43 +225,34 @@ Item {
                 }
             }
 
-            TextField {
+            TextFieldExt {
                 id: fieldStepUpPct
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("Step-Up If Fan % Above (%)")
-                }
+
+                minWidth: 195
+                label: qsTr("Step-Up If Fan % Above (%)")
                 text: pid ? pid.adaptiveSPStepUp.pct : 0
 
                 Binding {
                     target: pid.adaptiveSPStepUp; property: "pct"; value: fieldStepUpPct.text
                 }
             }
-            TextField {
+            TextFieldExt {
                 id: fieldStepUpDelay
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("For (seconds)")
-                }
+
+                minWidth: 85
+                label: qsTr("For (seconds)")
                 text: pid ? pid.adaptiveSPStepUp.delay : 0
 
                 Binding {
                     target: pid.adaptiveSPStepUp; property: "delay"; value: fieldStepUpDelay.text
                 }
             }
-            TextField {
+            TextFieldExt {
                 id: fieldStepUpCaseTempDelta
                 visible: fieldUseCaseTemp.checked
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("And Case Temp Delta Below (°C)")
-                }
+
+                minWidth: 195
+                label: qsTr("And Case Temp Delta Below (°C)")
                 text: pid ? pid.adaptiveSPStepUp.caseTempDelta : 0
 
                 Binding {
@@ -300,48 +261,38 @@ Item {
             }
             Item {
                 visible: !fieldUseCaseTemp.checked
-                Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
             }
 
 
-            TextField {
+            TextFieldExt {
                 id: fieldStepDownPct
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("Step-Down If Fan % Below (%)")
-                }
+
+                minWidth: 205
+                label: qsTr("Step-Down If Fan % Below (%)")
                 text: pid ? pid.adaptiveSPStepDown.pct : 0
 
                 Binding {
                     target: pid.adaptiveSPStepDown; property: "pct"; value: fieldStepDownPct.text
                 }
             }
-            TextField {
+            TextFieldExt {
                 id: fieldStepDownDelay
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("For (seconds)")
-                }
+
+                minWidth: 85
+                label: qsTr("For (seconds)")
                 text: pid ? pid.adaptiveSPStepDown.delay : 0
 
                 Binding {
                     target: pid.adaptiveSPStepDown; property: "delay"; value: fieldStepDownDelay.text
                 }
             }
-            TextField {
+            TextFieldExt {
                 id: fieldStepDownCaseTempDelta
                 visible: fieldUseCaseTemp.checked
-    //            Layout.fillWidth: true
-                Layout.preferredWidth: 135
-                Layout.minimumWidth: 90
-                Label {
-                    text: qsTr("And Case Temp Delta Above (°C)")
-                }
+
+                minWidth: 215
+                label: qsTr("And Case Temp Delta Above (°C)")
                 text: pid ? pid.adaptiveSPStepDown.caseTempDelta : 0
 
                 Binding {
@@ -350,10 +301,8 @@ Item {
             }
             Item {
                 visible: !fieldUseCaseTemp.checked
-                Layout.preferredWidth: 135
                 Layout.minimumWidth: 90
             }
-
         }
     }
 
