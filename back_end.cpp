@@ -71,6 +71,9 @@ const QVariantList& BackEndFan::tbl()
 
 void BackEndFan::setPinPWM(const quint8 &pinPWM)
 {
+    if (pinPWM == 0)
+        setMode(static_cast<quint8>(CONTROL_MODE::MODE_OFF));  // set control mode OFF if pinPWM==0
+
     if (pinPWM == fanConfig.pinPWM)
         return;
 
