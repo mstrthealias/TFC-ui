@@ -220,22 +220,19 @@ void HID_PnP::pollUSB()
             memcpy(&val, (buf + 22), 4);
             ui_data.deltaT = val/1000.0;
 
-//            memcpy(&val, (buf + 22), 4);
-//            ui_data.fanPercentPID = val/1000.0;
-            ui_data.fanPercentPID = 0;
-//            memcpy(&val, (buf + 26), 4);
-//            ui_data.fanPercentTbl = val/1000.0;
-            ui_data.fanPercentTbl = 0;
+            memcpy(&val, (buf + 26), 4);
+            ui_data.setpointAux1 = val/1000.0;
 
             memcpy(&val, (buf + 30), 4);
-            ui_data.setpoint = val/1000.0;
+            ui_data.setpointSupply = val/1000.0;
 
-            memcpy(&ui_data.rpm1, (buf + 34), 2);
-            memcpy(&ui_data.rpm2, (buf + 36), 2);
-            memcpy(&ui_data.rpm3, (buf + 38), 2);
-            memcpy(&ui_data.rpm4, (buf + 40), 2);
-            memcpy(&ui_data.rpm5, (buf + 42), 2);
-            memcpy(&ui_data.rpm6, (buf + 44), 2);
+            for (uint8_t i = 0; i < FAN_CNT; i++) {
+                UI_Data_Fan &fan =  ui_data.fans[i];
+                memcpy(&fan.rpm, (buf + 34 + 5*i), 2);
+                memcpy(&fan.pct, (buf + 36 + 5*i), 1);
+                memcpy(&fan.mode, (buf + 37 + 5*i), 1);
+                memcpy(&fan.source, (buf + 38 + 5*i), 1);
+            }
 
             hid_comm_update(ui_data.isConnectedData, ui_data);
         }

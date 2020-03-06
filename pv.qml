@@ -18,140 +18,99 @@ Page {
             anchors.margins: 12
             implicitHeight: tempsGrid.height + fansGrid.height + 60
 
-            GridLayout {
+            ColumnLayout {
                 id: tempsGrid
-
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                columns: 3
-
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "Supply Temp"
-                    readOnly: true
-                    text: backEnd.supplyTemp
-                }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "Return Temp"
-                    readOnly: true
-                    text: backEnd.returnTemp
-                }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "DeltaT"
-                    readOnly: true
-                    text: backEnd.deltaT
+                Text {
+                    text: qsTr("Sensors")
+                    lineHeight: 1.2
+                    Layout.minimumWidth: 105
+                    Layout.maximumWidth: 105
+                    verticalAlignment: Text.AlignTop
+                    font.pixelSize: 16
+                    font.bold: true
                 }
 
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "Set Point (PID)"
-                    readOnly: true
-                    text: backEnd.setpoint
+                PVSensor {
+                    title: qsTr("Water Supply")
+                    sensor: backEnd.sensor1
+                    visible: !!backEnd.sensor1.pin
+                    deltaT: backEnd.deltaT
+                    showDeltaT: !!backEnd.sensor2.pin
+                    hasSetpointData: true
                 }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "Case Temp"
-                    readOnly: true
-                    text: backEnd.caseTemp
+                PVSensor {
+                    title: qsTr("Water Return")
+                    sensor: backEnd.sensor2
+                    visible: !!backEnd.sensor2.pin
                 }
-                Item {
-                    width: 90
+                PVSensor {
+                    title: qsTr("Case")
+                    sensor: backEnd.sensor3
+                    visible: !!backEnd.sensor3.pin
                 }
-
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "Aux1 Temp"
-                    readOnly: true
-                    text: backEnd.aux1Temp
+                PVSensor {
+                    title: qsTr("Aux1")
+                    sensor: backEnd.sensor4
+                    visible: !!backEnd.sensor4.pin
+                    hasSetpointData: true
                 }
-
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "Aux2 Temp"
-                    readOnly: true
-                    text: backEnd.aux2Temp
+                PVSensor {
+                    title: qsTr("Aux2")
+                    sensor: backEnd.sensor5
+                    visible: !!backEnd.sensor5.pin
                 }
-
-//                TextFieldExt {
-//                    autoSelectText: false
-//                    label: "Fan Percent (PID)"
-//                    readOnly: true
-//                    text: backEnd.fanPercentPID
-//                }
-//                TextFieldExt {
-//                    autoSelectText: false
-//                    label: "Fan Percent (%-table)"
-//                    readOnly: true
-//                    text: backEnd.fanPercentTbl
-//                }
             }
 
-            GridLayout {
+            ColumnLayout {
                 id: fansGrid
                 anchors.top: tempsGrid.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.topMargin: 36
+                anchors.topMargin: 12
 
-                columns: 3
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "RPM1"
-                    readOnly: true
+                Text {
+                    text: qsTr("Fans")
+                    lineHeight: 1.2
+                    Layout.minimumWidth: 105
+                    Layout.maximumWidth: 105
+                    verticalAlignment: Text.AlignTop
+                    font.pixelSize: 16
+                    font.bold: true
+                }
+
+                PVFan {
+                    title: qsTr("Fan 1")
                     visible: !!backEnd.fan1.pinRPM
-                    text: backEnd.fan1.rpm
+                    fan: backEnd.fan1
                 }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "RPM2"
-                    readOnly: true
+                PVFan {
+                    title: qsTr("Fan 2")
                     visible: !!backEnd.fan2.pinRPM
-                    text: backEnd.fan2.rpm
+                    fan: backEnd.fan2
                 }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "RPM3"
-                    readOnly: true
+                PVFan {
+                    title: qsTr("Fan 3")
                     visible: !!backEnd.fan3.pinRPM
-                    text: backEnd.fan3.rpm
+                    fan: backEnd.fan3
                 }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "RPM4"
-                    readOnly: true
+                PVFan {
+                    title: qsTr("Fan 4")
                     visible: !!backEnd.fan4.pinRPM
-                    text: backEnd.fan4.rpm
+                    fan: backEnd.fan4
                 }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "RPM5"
-                    readOnly: true
+                PVFan {
+                    title: qsTr("Fan 5")
                     visible: !!backEnd.fan5.pinRPM
-                    text: backEnd.fan5.rpm
+                    fan: backEnd.fan5
                 }
-                TextFieldExt {
-                    autoSelectText: false
-                    Layout.maximumWidth: 165
-                    label: "RPM6"
-                    readOnly: true
+                PVFan {
+                    title: qsTr("Fan 6")
                     visible: !!backEnd.fan6.pinRPM
-                    text: backEnd.fan6.rpm
+                    fan: backEnd.fan6
                 }
             }
         }

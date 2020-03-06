@@ -2,7 +2,6 @@
 #include <QQmlApplicationEngine>
 #include <QDebug>
 
-#include "hid_pnp.h"
 #include "back_end.h"
 #include "log_list_model.h"
 

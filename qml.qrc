@@ -14,5 +14,7 @@
         <file>fan_pid.qml</file>
         <file>fan_tbl.qml</file>
         <file>TextFieldExt.qml</file>
+        <file>PVFan.qml</file>
+        <file>PVSensor.qml</file>
     </qresource>
 </RCC>

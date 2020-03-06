@@ -168,8 +168,8 @@ Item {
             spacing: 10
 
             TextFieldExt {
-                placeholderText: "°C"
-                label: "°C"
+                placeholderText: qsTr("°C")
+                label: qsTr("°C")
                 text: temp
                 onTextChanged: {
                     if (typeof text !== 'string')

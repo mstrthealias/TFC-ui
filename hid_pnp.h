@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <stdlib.h>
+#include <array>
 
 #include "runtime_config_inc.h"
 #include "../teensy_fan_controller/src/hid_shared.h"
@@ -14,28 +15,31 @@
 #define HID_CONNECT_FAIL_MAX 3
 
 
-class UI_Data
+struct UI_Data_Fan
 {
-    public:
+    uint16_t rpm = 0;
+    uint8_t pct = 0;
+    uint8_t mode = 0;
+    uint8_t source = 0;
+};
+
+struct UI_Data
+{
     bool isConnectedLog = false;
     bool isConnectedData = false;
     bool hasConfigDownloaded = false;
     bool pendingConfigUpdate = false;
-    uint16_t rpm1 = 0;
-    uint16_t rpm2 = 0;
-    uint16_t rpm3 = 0;
-    uint16_t rpm4 = 0;
-    uint16_t rpm5 = 0;
-    uint16_t rpm6 = 0;
-    qreal setpoint = 0.0;
+
     qreal supplyTemp = 0.0;
     qreal returnTemp = 0.0;
     qreal caseTemp = 0.0;
     qreal aux1Temp = 0.0;
     qreal aux2Temp = 0.0;
     qreal deltaT = 0.0;
-    qreal fanPercentPID = 0.0;
-    qreal fanPercentTbl = 0.0;
+    qreal setpointSupply = 0.0;
+    qreal setpointAux1 = 0.0;
+
+    std::array<UI_Data_Fan, FAN_CNT> fans;
 };
 
 
@@ -47,8 +51,8 @@ public:
     ~HID_PnP();
 
 signals:
-    void hid_config_download(bool isConnected, RuntimeConfig config);
-    void hid_comm_update(bool isConnected, UI_Data ui_data);
+    void hid_config_download(bool isConnected, const RuntimeConfig &config);
+    void hid_comm_update(bool isConnected, const UI_Data &ui_data);
     void hid_connect_failure(bool isDataConnection);
     void log_append(bool isConnected, QString str);
 

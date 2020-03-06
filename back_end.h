@@ -7,6 +7,40 @@
 #include "hid_pnp.h"
 
 
+class BackEndFanPV : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(quint16 rpm READ rpm WRITE setRpm NOTIFY rpmChanged)
+    Q_PROPERTY(quint8 pct READ pct WRITE setPct NOTIFY pctChanged)
+    Q_PROPERTY(quint8 mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(quint8 source READ source WRITE setSource NOTIFY sourceChanged)
+
+signals:
+    void rpmChanged();
+    void pctChanged();
+    void modeChanged();
+    void sourceChanged();
+
+public:
+    explicit BackEndFanPV(QObject *parent = nullptr);
+
+    quint16 rpm() const;
+    quint8 pct() const;
+    quint8 mode() const;
+    quint8 source() const;
+
+    void setRpm(const quint16 rpm);
+    void setPct(const quint8 pct);
+    void setMode(const quint8 mode);
+    void setSource(const quint8 source);
+
+private:
+    quint16 m_rpm = 0;
+    quint8 m_pct = 0;
+    quint8 m_mode = 0;
+    quint8 m_source = 0;
+};
+
 class BackEndFan : public QObject
 {
     Q_OBJECT
@@ -15,10 +49,9 @@ class BackEndFan : public QObject
     Q_PROPERTY(quint8 mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(quint8 source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(qreal ratio READ ratio WRITE setRatio NOTIFY ratioChanged)
-    Q_PROPERTY(quint16 rpm READ rpm WRITE setRpm NOTIFY rpmChanged)
-
     Q_PROPERTY(QVariantList tbl READ tbl WRITE setTbl NOTIFY tblChanged)
 
+    Q_PROPERTY(BackEndFanPV* pv READ pv WRITE setPv NOTIFY pvChanged)
 
 signals:
     void pinPWMChanged();
@@ -26,32 +59,33 @@ signals:
     void modeChanged();
     void sourceChanged();
     void ratioChanged();
-    void rpmChanged();
     void tblChanged();
+    void pvChanged();
 
 public:
     explicit BackEndFan(RuntimeConfig::FanConfig &fanConfig, QObject *parent = nullptr);
+    ~BackEndFan();
 
     quint8 pinPWM();
     quint8 pinRPM();
     quint8 mode();
     quint8 source();
     qreal ratio();
-    quint16 rpm();
-    const QVariantList& tbl();
+    QVariantList &tbl();
+    BackEndFanPV* pv() const;
 
-    void setPinPWM(const quint8 &pinPWM);
-    void setPinRPM(const quint8 &pinRPM);
-    void setMode(const quint8 &mode);
-    void setSource(const quint8 &source);
+    void setPinPWM(const quint8 pinPWM);
+    void setPinRPM(const quint8 pinRPM);
+    void setMode(const quint8 mode);
+    void setSource(const quint8 source);
     void setRatio(const qreal &ratio);
-    void setRpm(const quint16 rpm);
     void setTbl(const QVariantList &tbl);
+    void setPv(const BackEndFanPV* pv);
 
 private:
     RuntimeConfig::FanConfig &fanConfig;
-    quint16 m_rpm = 0;
     QVariantList pctTbl;
+    BackEndFanPV* m_pv = nullptr;
 };
 
 
@@ -62,28 +96,45 @@ class BackEndSensor : public QObject
     Q_PROPERTY(quint16 beta READ beta WRITE setBeta NOTIFY betaChanged)
     Q_PROPERTY(quint16 seriesR READ seriesR WRITE setSeriesR NOTIFY seriesRChanged)
     Q_PROPERTY(quint16 nominalR READ nominalR WRITE setNominalR NOTIFY nominalRChanged)
+    Q_PROPERTY(qreal pvTemp READ pvTemp WRITE setPvTemp NOTIFY pvTempChanged)
+    Q_PROPERTY(qreal pvSetpoint READ pvSetpoint WRITE setPvSetpoint NOTIFY pvSetpointChanged)
+    Q_PROPERTY(bool hasPid READ hasPid WRITE setHasPid NOTIFY hasPidChanged)
 
 signals:
     void pinChanged();
     void betaChanged();
     void seriesRChanged();
     void nominalRChanged();
+    void pvTempChanged();
+    void pvSetpointChanged();
+    void hasPidChanged();
 
 public:
     explicit BackEndSensor(RuntimeConfig::SensorConfig &sensorConfig, QObject *parent = nullptr);
 
-    quint8 pin();
-    quint16 beta();
-    quint16 seriesR();
-    quint16 nominalR();
+    void checkUsage(const RuntimeConfig &cfg, const CONTROL_SOURCE src);
 
-    void setPin(const quint8 &pin);
-    void setBeta(const quint16 &beta);
-    void setSeriesR(const quint16 &seriesR);
-    void setNominalR(const quint16 &nominalR);
+    quint8 pin() const;
+    quint16 beta() const;
+    quint16 seriesR() const;
+    quint16 nominalR() const;
+    const qreal &pvTemp() const;
+    const qreal &pvSetpoint() const;
+    bool hasPid() const;
+
+    void setPin(const quint8 pin);
+    void setBeta(const quint16 beta);
+    void setSeriesR(const quint16 seriesR);
+    void setNominalR(const quint16 nominalR);
+    void setPvTemp(const qreal &temp);
+    void setPvSetpoint(const qreal &setpoint);
+    void setHasPid(const bool hasPid);
 
 private:
     RuntimeConfig::SensorConfig &sensorConfig;
+    bool m_hasPid = false;
+    qreal m_temp = 0.0;
+    qreal m_setpoint = 0.0;
 };
 
 
@@ -102,12 +153,12 @@ signals:
 public:
     explicit BackEndPIDStep(RuntimeConfig::PIDConfig::PIDStep &step, QObject *parent = nullptr);
 
-    quint8 pct();
-    quint16 delay();
-    qreal caseTempDelta();
+    quint8 pct() const;
+    quint16 delay() const;
+    qreal caseTempDelta() const;
 
-    void setPct(const quint8 &pct);
-    void setDelay(const quint16 &delay);
+    void setPct(const quint8 pct);
+    void setDelay(const quint16 delay);
     void setCaseTempDelta(const qreal &caseTempDelta);
 
 private:
@@ -153,20 +204,20 @@ public:
     explicit BackEndPID(RuntimeConfig::PIDConfig &pid, QObject *parent = nullptr);
     ~BackEndPID();
 
-    quint8 percentMin();
-    quint8 percentMax1();
-    quint8 percentMax2();
-    qreal setpoint();
-    qreal setpointMin();
-    qreal setpointMax();
-    qreal gainP();
-    qreal gainI();
-    qreal gainD();
-    bool adaptiveSP();
-    bool adaptiveSPUseCaseTemp();
-    qreal adaptiveSPStepSize();
-    BackEndPIDStep* adaptiveSPStepUp();
-    BackEndPIDStep* adaptiveSPStepDown();
+    quint8 percentMin() const;
+    quint8 percentMax1() const;
+    quint8 percentMax2() const;
+    qreal setpoint() const;
+    qreal setpointMin() const;
+    qreal setpointMax() const;
+    qreal gainP() const;
+    qreal gainI() const;
+    qreal gainD() const;
+    bool adaptiveSP() const;
+    bool adaptiveSPUseCaseTemp() const;
+    qreal adaptiveSPStepSize() const;
+    BackEndPIDStep* adaptiveSPStepUp() const;
+    BackEndPIDStep* adaptiveSPStepDown() const;
 
     void setPercentMin(const quint8 pct);
     void setPercentMax1(const quint8 pct);
@@ -213,21 +264,12 @@ class BackEnd : public QObject
     Q_PROPERTY(BackEndSensor* sensor5 READ sensor5 WRITE setSensor5 NOTIFY sensor5Changed)
 
     // present values
-    Q_PROPERTY(qreal setpoint READ setpoint WRITE setSetpoint NOTIFY setpointChanged)
-    Q_PROPERTY(qreal supplyTemp READ supplyTemp WRITE setSupplyTemp NOTIFY supplyTempChanged)
-    Q_PROPERTY(qreal returnTemp READ returnTemp WRITE setReturnTemp NOTIFY returnTempChanged)
-    Q_PROPERTY(qreal caseTemp READ caseTemp WRITE setCaseTemp NOTIFY caseTempChanged)
-    Q_PROPERTY(qreal aux1Temp READ aux1Temp WRITE setAux1Temp NOTIFY aux1TempChanged)
-    Q_PROPERTY(qreal aux2Temp READ aux2Temp WRITE setAux2Temp NOTIFY aux2TempChanged)
     Q_PROPERTY(qreal deltaT READ deltaT WRITE setDeltaT NOTIFY deltaTChanged)
-    Q_PROPERTY(qreal fanPercentPID READ fanPercentPID WRITE setFanPercentPID NOTIFY fanPercentPIDChanged)
-    Q_PROPERTY(qreal fanPercentTbl READ fanPercentTbl WRITE setFanPercentTbl NOTIFY fanPercentTblChanged)
-
 
 public slots:
-    void update_gui(bool isConnected, UI_Data ui_data);
+    void update_gui(bool isConnected, const UI_Data &ui_data);
     void update_log(bool isConnected, QString str);
-    void update_config(bool isConnected, RuntimeConfig config);
+    void update_config(bool isConnected, const RuntimeConfig &config);
 
 signals:
     void hidConnectFailure(bool isDataConnection);
@@ -250,48 +292,33 @@ signals:
     void sensor4Changed();
     void sensor5Changed();
 
-    void setpointChanged();
-    void supplyTempChanged();
-    void returnTempChanged();
-    void caseTempChanged();
-    void aux1TempChanged();
-    void aux2TempChanged();
     void deltaTChanged();
-    void fanPercentPIDChanged();
-    void fanPercentTblChanged();
 
 public:
     explicit BackEnd(QObject *parent = nullptr);
-
     ~BackEnd();
 
     Q_INVOKABLE bool save();
 
-    BackEndPID* pid1();
-    BackEndPID* pid2();
-    BackEndPID* pid3();
-    BackEndPID* pid4();
-    BackEndFan* fan1();
-    BackEndFan* fan2();
-    BackEndFan* fan3();
-    BackEndFan* fan4();
-    BackEndFan* fan5();
-    BackEndFan* fan6();
-    BackEndSensor* sensor1();
-    BackEndSensor* sensor2();
-    BackEndSensor* sensor3();
-    BackEndSensor* sensor4();
-    BackEndSensor* sensor5();
+    void checkUsages();
 
-    qreal setpoint();
-    qreal supplyTemp();
-    qreal returnTemp();
-    qreal caseTemp();
-    qreal aux1Temp();
-    qreal aux2Temp();
-    qreal deltaT();
-    qreal fanPercentPID();
-    qreal fanPercentTbl();
+    BackEndPID* pid1() const;
+    BackEndPID* pid2() const;
+    BackEndPID* pid3() const;
+    BackEndPID* pid4() const;
+    BackEndFan* fan1() const;
+    BackEndFan* fan2() const;
+    BackEndFan* fan3() const;
+    BackEndFan* fan4() const;
+    BackEndFan* fan5() const;
+    BackEndFan* fan6() const;
+    BackEndSensor* sensor1() const;
+    BackEndSensor* sensor2() const;
+    BackEndSensor* sensor3() const;
+    BackEndSensor* sensor4() const;
+    BackEndSensor* sensor5() const;
+
+    qreal deltaT() const;
 
     void setPid1(BackEndPID *pid);
     void setPid2(BackEndPID *pid);
@@ -309,15 +336,7 @@ public:
     void setSensor4(BackEndSensor *sensor);
     void setSensor5(BackEndSensor *sensor);
 
-    void setSetpoint(const qreal &setpoint);
-    void setSupplyTemp(const qreal &supplyTemp);
-    void setReturnTemp(const qreal &returnTemp);
-    void setCaseTemp(const qreal &caseTemp);
-    void setAux1Temp(const qreal &auxTemp);
-    void setAux2Temp(const qreal &auxTemp);
     void setDeltaT(const qreal &deltaT);
-    void setFanPercentPID(const qreal &fanPercent);
-    void setFanPercentTbl(const qreal &fanPercent);
 
 private:
     HID_PnP *ctrl = nullptr;
@@ -338,15 +357,7 @@ private:
     BackEndSensor *sensor4Config = nullptr;
     BackEndSensor *sensor5Config = nullptr;
 
-    qreal m_setpoint = 0.0;
-    qreal m_supplyTemp = 0.0;
-    qreal m_returnTemp = 0.0;
-    qreal m_caseTemp = 0.0;
-    qreal m_aux1Temp = 0.0;
-    qreal m_aux2Temp = 0.0;
     qreal m_deltaT = 0.0;
-    qreal m_fanPercentPID = 0.0;
-    qreal m_fanPercentTbl = 0.0;
 
     QString logBuffer = "";
 

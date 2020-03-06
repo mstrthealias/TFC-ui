@@ -7,6 +7,7 @@ TextField {
     property string tooltip: ""
     property string label: ""
     property int minWidth: 115
+    property var labelColor
 
     Layout.preferredHeight: 59
     Layout.minimumHeight: 59
@@ -19,6 +20,7 @@ TextField {
     Label {
         text: label
         wrapMode: Text.WrapAnywhere
+        color: labelColor || color
     }
 
     ToolTip {

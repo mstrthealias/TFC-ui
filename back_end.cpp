@@ -24,9 +24,80 @@ static inline qreal toReal(TFloat a, TMulti multi = 10000)
 }
 
 
+BackEndFanPV::BackEndFanPV(QObject *parent) :
+    QObject(parent)
+{
+}
+
+void BackEndFanPV::setRpm(const quint16 rpm)
+{
+    if (rpm == m_rpm)
+        return;
+
+    m_rpm = rpm;
+    emit rpmChanged();
+}
+void BackEndFanPV::setPct(const quint8 pct)
+{
+    if (pct == m_pct)
+        return;
+
+    m_pct = pct;
+    emit pctChanged();
+}
+void BackEndFanPV::setMode(const quint8 mode)
+{
+    if (mode == m_mode)
+        return;
+    else if (mode > 3)
+        return;
+
+    m_mode = mode;
+    emit modeChanged();
+}
+void BackEndFanPV::setSource(const quint8 source)
+{
+    if (source == m_source) {
+        return;
+    }
+    else if (source > 5) {
+        return;
+    }
+
+    m_source = source;
+    emit sourceChanged();
+}
+
+quint16 BackEndFanPV::rpm() const
+{
+    return m_rpm;
+}
+quint8 BackEndFanPV::pct() const
+{
+    return m_pct;
+}
+quint8 BackEndFanPV::mode() const
+{
+    return m_mode;
+}
+quint8 BackEndFanPV::source() const
+{
+    return m_source;
+}
+
+
 BackEndFan::BackEndFan(RuntimeConfig::FanConfig &fanConfig, QObject *parent) :
     QObject(parent), fanConfig(fanConfig), pctTbl()
 {
+    m_pv = new BackEndFanPV(this);
+}
+
+BackEndFan::~BackEndFan()
+{
+    if (m_pv != nullptr) {
+        delete m_pv;
+        m_pv = nullptr;
+    }
 }
 
 quint8 BackEndFan::pinPWM()
@@ -50,12 +121,7 @@ qreal BackEndFan::ratio()
     return toReal(fanConfig.ratio);
 }
 
-quint16 BackEndFan::rpm()
-{
-    return m_rpm;
-}
-
-const QVariantList& BackEndFan::tbl()
+QVariantList &BackEndFan::tbl()
 {
     pctTbl.clear();
     const auto &pctTable = fanConfig.tbl.temp_pct_table;
@@ -69,7 +135,12 @@ const QVariantList& BackEndFan::tbl()
     return pctTbl;
 }
 
-void BackEndFan::setPinPWM(const quint8 &pinPWM)
+BackEndFanPV* BackEndFan::pv() const
+{
+    return m_pv;
+}
+
+void BackEndFan::setPinPWM(const quint8 pinPWM)
 {
     if (pinPWM == 0)
         setMode(static_cast<quint8>(CONTROL_MODE::MODE_OFF));  // set control mode OFF if pinPWM==0
@@ -80,7 +151,7 @@ void BackEndFan::setPinPWM(const quint8 &pinPWM)
     fanConfig.pinPWM = pinPWM;
     emit pinPWMChanged();
 }
-void BackEndFan::setPinRPM(const quint8 &pinRPM)
+void BackEndFan::setPinRPM(const quint8 pinRPM)
 {
     if (pinRPM == fanConfig.pinRPM)
         return;
@@ -88,7 +159,7 @@ void BackEndFan::setPinRPM(const quint8 &pinRPM)
     fanConfig.pinRPM = pinRPM;
     emit pinRPMChanged();
 }
-void BackEndFan::setMode(const quint8 &mode)
+void BackEndFan::setMode(const quint8 mode)
 {
     if (mode == static_cast<quint8>(fanConfig.mode))
         return;
@@ -98,7 +169,7 @@ void BackEndFan::setMode(const quint8 &mode)
     fanConfig.mode = static_cast<CONTROL_MODE>(mode);
     emit modeChanged();
 }
-void BackEndFan::setSource(const quint8 &source)
+void BackEndFan::setSource(const quint8 source)
 {
     if (source == static_cast<quint8>(fanConfig.source)) {
         return;
@@ -123,15 +194,6 @@ void BackEndFan::setRatio(const qreal &ratio)
     emit ratioChanged();
 }
 
-void BackEndFan::setRpm(const quint16 rpm)
-{
-    if (rpm == m_rpm)
-        return;
-
-    m_rpm = rpm;
-    emit rpmChanged();
-}
-
 void BackEndFan::setTbl(const QVariantList &tbl)
 {
     uint8_t i = 0;
@@ -152,30 +214,66 @@ void BackEndFan::setTbl(const QVariantList &tbl)
     emit tblChanged();
 }
 
+void BackEndFan::setPv(const BackEndFanPV* pv)
+{
+    if (pv->pct() == m_pv->pct() && pv->rpm() == m_pv->rpm() && pv->mode() == m_pv->mode() && pv->source() == m_pv->source())
+        return;
+
+    m_pv->setPct(pv->pct());
+    m_pv->setRpm(pv->rpm());
+    m_pv->setMode(pv->mode());
+    m_pv->setSource(pv->source());
+
+    emit pvChanged();
+}
+
 
 BackEndSensor::BackEndSensor(RuntimeConfig::SensorConfig &sensorConfig, QObject *parent) :
     QObject(parent), sensorConfig(sensorConfig)
 {
 }
 
-quint8 BackEndSensor::pin()
+void BackEndSensor::checkUsage(const RuntimeConfig &cfg, const CONTROL_SOURCE src)
+{
+    setHasPid((cfg.fan1.source == src && cfg.fan1.mode == CONTROL_MODE::MODE_PID)
+            || (cfg.fan2.source == src && cfg.fan2.mode == CONTROL_MODE::MODE_PID)
+            || (cfg.fan3.source == src && cfg.fan3.mode == CONTROL_MODE::MODE_PID)
+            || (cfg.fan4.source == src && cfg.fan4.mode == CONTROL_MODE::MODE_PID)
+            || (cfg.fan5.source == src && cfg.fan5.mode == CONTROL_MODE::MODE_PID)
+            || (cfg.fan6.source == src && cfg.fan6.mode == CONTROL_MODE::MODE_PID));
+}
+
+quint8 BackEndSensor::pin() const
 {
     return sensorConfig.pin;
 }
-quint16 BackEndSensor::beta()
+quint16 BackEndSensor::beta() const
 {
     return sensorConfig.beta;
 }
-quint16 BackEndSensor::seriesR()
+quint16 BackEndSensor::seriesR() const
 {
     return sensorConfig.seriesR;
 }
-quint16 BackEndSensor::nominalR()
+quint16 BackEndSensor::nominalR() const
 {
     return sensorConfig.nominalR;
 }
+const qreal& BackEndSensor::pvSetpoint() const
+{
+    return m_setpoint;
+}
 
-void BackEndSensor::setPin(const quint8 &pin)
+const qreal& BackEndSensor::pvTemp() const
+{
+    return m_temp;
+}
+bool BackEndSensor::hasPid() const
+{
+    return m_hasPid;
+}
+
+void BackEndSensor::setPin(const quint8 pin)
 {
     if (pin == sensorConfig.pin)
         return;
@@ -183,7 +281,7 @@ void BackEndSensor::setPin(const quint8 &pin)
     sensorConfig.pin = pin;
     emit pinChanged();
 }
-void BackEndSensor::setBeta(const quint16 &beta)
+void BackEndSensor::setBeta(const quint16 beta)
 {
     if (beta == sensorConfig.beta)
         return;
@@ -191,7 +289,7 @@ void BackEndSensor::setBeta(const quint16 &beta)
     sensorConfig.beta = beta;
     emit betaChanged();
 }
-void BackEndSensor::setSeriesR(const quint16 &seriesR)
+void BackEndSensor::setSeriesR(const quint16 seriesR)
 {
     if (seriesR == sensorConfig.seriesR)
         return;
@@ -199,7 +297,7 @@ void BackEndSensor::setSeriesR(const quint16 &seriesR)
     sensorConfig.seriesR = seriesR;
     emit seriesRChanged();
 }
-void BackEndSensor::setNominalR(const quint16 &nominalR)
+void BackEndSensor::setNominalR(const quint16 nominalR)
 {
     if (nominalR == sensorConfig.nominalR)
         return;
@@ -207,7 +305,31 @@ void BackEndSensor::setNominalR(const quint16 &nominalR)
     sensorConfig.nominalR = nominalR;
     emit nominalRChanged();
 }
+void BackEndSensor::setPvTemp(const qreal &temp)
+{
+    if (isApproximatelyEqual(temp, m_temp))
+        return;
 
+    m_temp = temp;
+    emit pvTempChanged();
+}
+void BackEndSensor::setPvSetpoint(const qreal &setpoint)
+{
+    setHasPid(setpoint > 0);
+    if (isApproximatelyEqual(setpoint, m_setpoint))
+        return;
+
+    m_setpoint = setpoint;
+    emit pvSetpointChanged();
+}
+void BackEndSensor::setHasPid(const bool hasPid)
+{
+    if (hasPid == m_hasPid)
+        return;
+
+    m_hasPid = hasPid;
+    emit hasPidChanged();
+}
 
 
 
@@ -216,22 +338,22 @@ BackEndPIDStep::BackEndPIDStep(RuntimeConfig::PIDConfig::PIDStep &step, QObject 
 {
 }
 
-quint8 BackEndPIDStep::pct()
+quint8 BackEndPIDStep::pct() const
 {
     return step.pct;
 }
 
-quint16 BackEndPIDStep::delay()
+quint16 BackEndPIDStep::delay() const
 {
     return step.delay;
 }
 
-qreal BackEndPIDStep::caseTempDelta()
+qreal BackEndPIDStep::caseTempDelta() const
 {
     return toReal(step.case_temp_delta);
 }
 
-void BackEndPIDStep::setPct(const quint8 &pct)
+void BackEndPIDStep::setPct(const quint8 pct)
 {
     if (pct == step.pct)
         return;
@@ -240,7 +362,7 @@ void BackEndPIDStep::setPct(const quint8 &pct)
     emit pctChanged();
 }
 
-void BackEndPIDStep::setDelay(const quint16 &delay)
+void BackEndPIDStep::setDelay(const quint16 delay)
 {
     if (delay == step.delay)
         return;
@@ -263,8 +385,8 @@ void BackEndPIDStep::setCaseTempDelta(const qreal &caseTempDelta)
 BackEndPID::BackEndPID(RuntimeConfig::PIDConfig &pid, QObject *parent) :
     QObject(parent), pid(pid)
 {
-    stepUpConfig = new BackEndPIDStep(pid.adaptive_sp_step_up, parent);
-    stepDownConfig = new BackEndPIDStep(pid.adaptive_sp_step_down, parent);
+    stepUpConfig = new BackEndPIDStep(pid.adaptive_sp_step_up, this);
+    stepDownConfig = new BackEndPIDStep(pid.adaptive_sp_step_down, this);
 }
 
 BackEndPID::~BackEndPID()
@@ -279,72 +401,72 @@ BackEndPID::~BackEndPID()
     }
 }
 
-quint8 BackEndPID::percentMin()
+quint8 BackEndPID::percentMin() const
 {
     return pid.pwm_percent_min;
 }
 
-quint8 BackEndPID::percentMax1()
+quint8 BackEndPID::percentMax1() const
 {
     return pid.pwm_percent_max1;
 }
 
-quint8 BackEndPID::percentMax2()
+quint8 BackEndPID::percentMax2() const
 {
     return pid.pwm_percent_max2;
 }
 
-qreal BackEndPID::setpoint()
+qreal BackEndPID::setpoint() const
 {
     return toReal(pid.setpoint);
 }
 
-qreal BackEndPID::setpointMin()
+qreal BackEndPID::setpointMin() const
 {
     return toReal(pid.setpoint_min);
 }
 
-qreal BackEndPID::setpointMax()
+qreal BackEndPID::setpointMax() const
 {
     return toReal(pid.setpoint_max);
 }
 
-qreal BackEndPID::gainP()
+qreal BackEndPID::gainP() const
 {
     return toReal(pid.gain_p);
 }
 
-qreal BackEndPID::gainI()
+qreal BackEndPID::gainI() const
 {
     return toReal(pid.gain_i);
 }
 
-qreal BackEndPID::gainD()
+qreal BackEndPID::gainD() const
 {
     return toReal(pid.gain_d);
 }
 
-bool BackEndPID::adaptiveSP()
+bool BackEndPID::adaptiveSP() const
 {
     return pid.adaptive_sp;
 }
 
-bool BackEndPID::adaptiveSPUseCaseTemp()
+bool BackEndPID::adaptiveSPUseCaseTemp() const
 {
     return pid.adaptive_sp_check_case_temp;
 }
 
-qreal BackEndPID::adaptiveSPStepSize()
+qreal BackEndPID::adaptiveSPStepSize() const
 {
     return toReal(pid.adaptive_sp_step_size);
 }
 
-BackEndPIDStep* BackEndPID::adaptiveSPStepUp()
+BackEndPIDStep* BackEndPID::adaptiveSPStepUp() const
 {
     return stepUpConfig;
 }
 
-BackEndPIDStep* BackEndPID::adaptiveSPStepDown()
+BackEndPIDStep* BackEndPID::adaptiveSPStepDown() const
 {
     return stepDownConfig;
 }
@@ -484,24 +606,24 @@ void BackEndPID::setAdaptiveSPStepDown(BackEndPIDStep *step)
 BackEnd::BackEnd(QObject *parent) :
     QObject(parent)
 {
-    ctrl = new HID_PnP(parent);
+    ctrl = new HID_PnP(this);
 
-    pid1Config = new BackEndPID(m_config.tempSupply.pid, parent);
-    pid2Config = new BackEndPID(m_config.tempCase.pid, parent);
-    pid3Config = new BackEndPID(m_config.tempAux1.pid, parent);
-    pid4Config = new BackEndPID(m_config.tempAux2.pid, parent);
-    fan1Config = new BackEndFan(m_config.fan1, parent);
-    fan2Config = new BackEndFan(m_config.fan2, parent);
-    fan3Config = new BackEndFan(m_config.fan3, parent);
-    fan4Config = new BackEndFan(m_config.fan4, parent);
-    fan5Config = new BackEndFan(m_config.fan5, parent);
-    fan6Config = new BackEndFan(m_config.fan6, parent);
+    pid1Config = new BackEndPID(m_config.tempSupply.pid, this);
+    pid2Config = new BackEndPID(m_config.tempCase.pid, this);
+    pid3Config = new BackEndPID(m_config.tempAux1.pid, this);
+    pid4Config = new BackEndPID(m_config.tempAux2.pid, this);
+    fan1Config = new BackEndFan(m_config.fan1, this);
+    fan2Config = new BackEndFan(m_config.fan2, this);
+    fan3Config = new BackEndFan(m_config.fan3, this);
+    fan4Config = new BackEndFan(m_config.fan4, this);
+    fan5Config = new BackEndFan(m_config.fan5, this);
+    fan6Config = new BackEndFan(m_config.fan6, this);
 
-    sensor1Config = new BackEndSensor(m_config.tempSupply, parent);
-    sensor2Config = new BackEndSensor(m_config.tempReturn, parent);
-    sensor3Config = new BackEndSensor(m_config.tempCase, parent);
-    sensor4Config = new BackEndSensor(m_config.tempAux1, parent);
-    sensor5Config = new BackEndSensor(m_config.tempAux2, parent);
+    sensor1Config = new BackEndSensor(m_config.tempSupply, this);
+    sensor2Config = new BackEndSensor(m_config.tempReturn, this);
+    sensor3Config = new BackEndSensor(m_config.tempCase, this);
+    sensor4Config = new BackEndSensor(m_config.tempAux1, this);
+    sensor5Config = new BackEndSensor(m_config.tempAux2, this);
 
     connect(ctrl, SIGNAL(hid_connect_failure(bool)), this, SIGNAL(hidConnectFailure(bool)));
 
@@ -510,6 +632,9 @@ BackEnd::BackEnd(QObject *parent) :
     connect(ctrl, SIGNAL(hid_config_download(bool, RuntimeConfig)), this, SLOT(update_config(bool, RuntimeConfig)));
 
     connect(this, SIGNAL(saveConfig(RuntimeConfig)), ctrl, SLOT(saveConfig(RuntimeConfig)));
+
+    // check fan/sensor usages
+    checkUsages();
 }
 
 BackEnd::~BackEnd()
@@ -590,25 +715,38 @@ BackEnd::~BackEnd()
     return true;
 }
 
-void BackEnd::update_gui(bool isConnected, UI_Data ui_data)
+void BackEnd::checkUsages()
+{
+    sensor1Config->checkUsage(m_config, CONTROL_SOURCE::SENSOR_WATER_SUPPLY_TEMP);
+    sensor2Config->checkUsage(m_config, CONTROL_SOURCE::SENSOR_WATER_RETURN_TEMP);
+    sensor3Config->checkUsage(m_config, CONTROL_SOURCE::SENSOR_CASE_TEMP);
+    sensor4Config->checkUsage(m_config, CONTROL_SOURCE::SENSOR_AUX1_TEMP);
+    sensor5Config->checkUsage(m_config, CONTROL_SOURCE::SENSOR_AUX2_TEMP);
+}
+
+void BackEnd::update_gui(bool isConnected, const UI_Data &ui_data)
 {
     if (!isConnected)
         return;
-    setSupplyTemp(static_cast<const qreal>(ui_data.supplyTemp));
-    setReturnTemp(static_cast<const qreal>(ui_data.returnTemp));
-    setCaseTemp(static_cast<const qreal>(ui_data.caseTemp));
-    setAux1Temp(static_cast<const qreal>(ui_data.aux1Temp));
-    setAux2Temp(static_cast<const qreal>(ui_data.aux2Temp));
+    sensor1Config->setPvTemp(ui_data.supplyTemp);
+    sensor1Config->setPvSetpoint(ui_data.setpointSupply);
+    sensor2Config->setPvTemp(ui_data.returnTemp);
+    sensor3Config->setPvTemp(ui_data.caseTemp);
+    sensor4Config->setPvTemp(ui_data.aux1Temp);
+    sensor4Config->setPvSetpoint(ui_data.setpointAux1);
+    sensor5Config->setPvTemp(ui_data.aux2Temp);
     setDeltaT(static_cast<const qreal>(ui_data.deltaT));
-    setSetpoint(static_cast<const qreal>(ui_data.setpoint));
-    setFanPercentPID(static_cast<const qreal>(ui_data.fanPercentPID));
-    setFanPercentTbl(static_cast<const qreal>(ui_data.fanPercentTbl));
-    fan1Config->setRpm(ui_data.rpm1);
-    fan2Config->setRpm(ui_data.rpm2);
-    fan3Config->setRpm(ui_data.rpm3);
-    fan4Config->setRpm(ui_data.rpm4);
-    fan5Config->setRpm(ui_data.rpm5);
-    fan6Config->setRpm(ui_data.rpm6);
+
+    BackEndFan *fans[FAN_CNT] = {fan1Config, fan2Config, fan3Config, fan4Config, fan5Config, fan6Config};
+    uint8_t i;
+    for (i = 0; i < FAN_CNT; i++) {
+        const UI_Data_Fan &src = ui_data.fans[i];
+        BackEndFanPV &pv = *fans[i]->pv();
+        pv.setRpm(src.rpm);
+        pv.setPct(src.pct);
+        pv.setMode(src.mode);
+        pv.setSource(src.source);
+    }
 }
 
 void BackEnd::update_log(bool isConnected, QString str)
@@ -622,7 +760,7 @@ void BackEnd::update_log(bool isConnected, QString str)
     }
 }
 
-void BackEnd::update_config(bool isConnected, RuntimeConfig config)
+void BackEnd::update_config(bool isConnected, const RuntimeConfig &config)
 {
     if (!isConnected)
         return;
@@ -635,113 +773,76 @@ void BackEnd::update_config(bool isConnected, RuntimeConfig config)
     emit fan4Changed();
     emit fan5Changed();
     emit fan6Changed();
+
+    checkUsages();
 }
 
-BackEndPID* BackEnd::pid1()
+BackEndPID* BackEnd::pid1() const
 {
     return pid1Config;
 }
-BackEndPID* BackEnd::pid2()
+BackEndPID* BackEnd::pid2() const
 {
     return pid2Config;
 }
-BackEndPID* BackEnd::pid3()
+BackEndPID* BackEnd::pid3() const
 {
     return pid3Config;
 }
-BackEndPID* BackEnd::pid4()
+BackEndPID* BackEnd::pid4() const
 {
     return pid4Config;
 }
 
-BackEndFan* BackEnd::fan1()
+BackEndFan* BackEnd::fan1() const
 {
     return fan1Config;
 }
-BackEndFan* BackEnd::fan2()
+BackEndFan* BackEnd::fan2() const
 {
     return fan2Config;
 }
-BackEndFan* BackEnd::fan3()
+BackEndFan* BackEnd::fan3() const
 {
     return fan3Config;
 }
-BackEndFan* BackEnd::fan4()
+BackEndFan* BackEnd::fan4() const
 {
     return fan4Config;
 }
-BackEndFan* BackEnd::fan5()
+BackEndFan* BackEnd::fan5() const
 {
     return fan5Config;
 }
-BackEndFan* BackEnd::fan6()
+BackEndFan* BackEnd::fan6() const
 {
     return fan6Config;
 }
 
-BackEndSensor* BackEnd::sensor1()
+BackEndSensor* BackEnd::sensor1() const
 {
     return sensor1Config;
 }
-BackEndSensor* BackEnd::sensor2()
+BackEndSensor* BackEnd::sensor2() const
 {
     return sensor2Config;
 }
-BackEndSensor* BackEnd::sensor3()
+BackEndSensor* BackEnd::sensor3() const
 {
     return sensor3Config;
 }
-BackEndSensor* BackEnd::sensor4()
+BackEndSensor* BackEnd::sensor4() const
 {
     return sensor4Config;
 }
-BackEndSensor* BackEnd::sensor5()
+BackEndSensor* BackEnd::sensor5() const
 {
     return sensor5Config;
 }
 
-qreal BackEnd::setpoint()
-{
-    return m_setpoint;
-}
-
-qreal BackEnd::supplyTemp()
-{
-    return m_supplyTemp;
-}
-
-qreal BackEnd::returnTemp()
-{
-    return m_returnTemp;
-}
-
-qreal BackEnd::caseTemp()
-{
-    return m_caseTemp;
-}
-
-qreal BackEnd::aux1Temp()
-{
-    return m_aux1Temp;
-}
-qreal BackEnd::aux2Temp()
-{
-    return m_aux2Temp;
-}
-
-qreal BackEnd::deltaT()
+qreal BackEnd::deltaT() const
 {
     return m_deltaT;
-}
-
-qreal BackEnd::fanPercentPID()
-{
-    return m_fanPercentPID;
-}
-
-qreal BackEnd::fanPercentTbl()
-{
-    return m_fanPercentTbl;
 }
 
 void BackEnd::setPid1(BackEndPID *pid)
@@ -856,59 +957,6 @@ void BackEnd::setSensor5(BackEndSensor *sensor)
     emit sensor5Changed();
 }
 
-void BackEnd::setSetpoint(const qreal &setpoint)
-{
-    if (isApproximatelyEqual(setpoint, m_setpoint))
-        return;
-
-    m_setpoint = setpoint;
-    emit setpointChanged();
-}
-
-void BackEnd::setSupplyTemp(const qreal &supplyTemp)
-{
-    if (isApproximatelyEqual(supplyTemp, m_supplyTemp))
-        return;
-
-    m_supplyTemp = supplyTemp;
-    emit supplyTempChanged();
-}
-
-void BackEnd::setReturnTemp(const qreal &returnTemp)
-{
-    if (isApproximatelyEqual(returnTemp, m_returnTemp))
-        return;
-
-    m_returnTemp = returnTemp;
-    emit returnTempChanged();
-}
-
-void BackEnd::setCaseTemp(const qreal &caseTemp)
-{
-    if (isApproximatelyEqual(caseTemp, m_caseTemp))
-        return;
-
-    m_caseTemp = caseTemp;
-    emit caseTempChanged();
-}
-
-void BackEnd::setAux1Temp(const qreal &auxTemp)
-{
-    if (isApproximatelyEqual(auxTemp, m_aux1Temp))
-        return;
-
-    m_aux1Temp = auxTemp;
-    emit aux1TempChanged();
-}
-void BackEnd::setAux2Temp(const qreal &auxTemp)
-{
-    if (isApproximatelyEqual(auxTemp, m_aux2Temp))
-        return;
-
-    m_aux2Temp = auxTemp;
-    emit aux2TempChanged();
-}
-
 void BackEnd::setDeltaT(const qreal &deltaT)
 {
     if (isApproximatelyEqual(deltaT, m_deltaT))
@@ -916,24 +964,6 @@ void BackEnd::setDeltaT(const qreal &deltaT)
 
     m_deltaT = deltaT;
     emit deltaTChanged();
-}
-
-void BackEnd::setFanPercentPID(const qreal &fanPercent)
-{
-    if (isApproximatelyEqual(fanPercent, m_fanPercentPID))
-        return;
-
-    m_fanPercentPID = fanPercent;
-    emit fanPercentPIDChanged();
-}
-
-void BackEnd::setFanPercentTbl(const qreal &fanPercent)
-{
-    if (isApproximatelyEqual(fanPercent, m_fanPercentTbl))
-        return;
-
-    m_fanPercentTbl = fanPercent;
-    emit fanPercentTblChanged();
 }
 
 
