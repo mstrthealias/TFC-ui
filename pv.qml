@@ -6,7 +6,7 @@ Page {
     width: parent ? parent.width : 0
     height: parent ? parent.height : 0
 
-    title: qsTr("Present Values")
+    title: "Teensy Fan Controller"
 
     ScrollView {
         anchors.fill: parent

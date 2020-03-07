@@ -67,6 +67,13 @@ HID_PnP::~HID_PnP()
     }
 }
 
+void HID_PnP::reconnect()
+{
+    // reset connect retry limits to 0, to trigger reconnect
+    connectDataErrCnt = 0;
+    connectLogErrCnt = 0;
+}
+
 bool HID_PnP::saveConfig(const RuntimeConfig &conf)
 {
     if (ui_data.pendingConfigUpdate) {
@@ -98,7 +105,6 @@ bool HID_PnP::writeConfigChunk(uint8_t chunk, bool isLast)
     }
     if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
         closeDevice();
-        ui_data.isConnectedData = false;
         return false;
     }
     return true;
@@ -109,6 +115,7 @@ void HID_PnP::pollUSB()
 //    qDebug() << "pollUSB()";
     memset(buf, 0x00, sizeof(buf));
 
+    uint8_t connectAttempts = 0;
     if (ui_data.isConnectedLog == false && connectLogErrCnt < HID_CONNECT_FAIL_MAX) {
         deviceLog = hid_open_interface(0x16C0, 0x0486, 1);
         //deviceLog = hid_open_usage(0x16C0, 0x0486, 0xFFC9, 0x0004);  // HIDAPI Linux does not support usage/usage_page
@@ -119,11 +126,12 @@ void HID_PnP::pollUSB()
             connectLogErrCnt = 0;
             //timer->start(15);
             timer->start(50);
+            connectAttempts++;
         }
         else {
             if (++connectLogErrCnt >= HID_CONNECT_FAIL_MAX) {
                 qDebug() << "No Log Data connection, all attempts failed";
-                hid_connect_failure(false);
+                connectAttempts++;
             }
             else {
                 qDebug() << "HID Log connection attempt failure";
@@ -140,16 +148,24 @@ void HID_PnP::pollUSB()
             connectDataErrCnt = 0;
             //timer->start(15);
             timer->start(50);
+            connectAttempts++;
         }
         else {
             if (++connectDataErrCnt >= HID_CONNECT_FAIL_MAX) {
                 qDebug() << "No HID Data connection, all attempts failed";
-                hid_connect_failure(true);
+                connectAttempts++;
             }
             else {
                 qDebug() << "HID Data connection attempt failure";
             }
         }
+    }
+    // notify UI of connection status:
+    if (connectAttempts) {
+        hid_connect_status((ui_data.isConnectedLog == false && connectLogErrCnt < HID_CONNECT_FAIL_MAX) || (ui_data.isConnectedData == false && connectDataErrCnt < HID_CONNECT_FAIL_MAX), ui_data.isConnectedData, ui_data.isConnectedLog);
+    }
+    else if ((ui_data.isConnectedLog == false && connectLogErrCnt < HID_CONNECT_FAIL_MAX) || (ui_data.isConnectedData == false && connectDataErrCnt < HID_CONNECT_FAIL_MAX)) {
+        hid_connect_status(true, ui_data.isConnectedData, ui_data.isConnectedLog);
     }
 
     if (ui_data.isConnectedLog) {
@@ -157,7 +173,6 @@ void HID_PnP::pollUSB()
         int len = hid_read(deviceLog, buf, sizeof(buf) - 1);
         if (len == -1) {
             closeDevice();
-            ui_data.isConnectedLog = false;
             return;
         }
         if (len && buf[0] != 0x0) {
@@ -170,12 +185,13 @@ void HID_PnP::pollUSB()
         int len = hid_read(deviceData, buf, sizeof(buf) - 1);
         if (len == -1) {
             closeDevice();
-            ui_data.isConnectedData = false;
             return;
         }
 
         if (buf[0] == HID_PAYLOAD_CONFIG1 && buf[1] >= HID_PAYLOAD_CONFIG2 && buf[1] < HID_PAYLOAD_CONFIG2 + CHUNK_CNT) {
             // Remote is sending configuration payload chunk n
+            hid_state(HID_CONFIG);
+
             // TODO state ?
             uint8_t chunk = buf[1] - HID_PAYLOAD_CONFIG2;
 
@@ -198,6 +214,7 @@ void HID_PnP::pollUSB()
                 qDebug() << "Config version" << config.config_version << "downloaded";
 
                 hid_config_download(ui_data.isConnectedData, config);
+                hid_state(HID_DATA);
             }
         }
         else if (buf[0] == HID_OUT_PAYLOAD_DATA1 && buf[1] == HID_OUT_PAYLOAD_DATA2) {
@@ -247,13 +264,15 @@ void HID_PnP::pollUSB()
             buf[64] = HID_CONFIG;  // put next state at the end
             if (hid_write(deviceData, buf, sizeof(buf)) == -1) {
                 closeDevice();
-                ui_data.isConnectedData = false;
                 return;
             }
             qDebug() << "Config requested";
+            hid_state(HID_CONFIG);
         }
         else if (ui_data.pendingConfigUpdate) {
             ui_data.pendingConfigUpdate = false;
+
+            hid_state(HID_DOWNLOAD);
 
             // copy entire configuration into config_bytes
             if (config.toBytes(config_bytes, CONFIG_BYTES) != 0) {
@@ -268,12 +287,14 @@ void HID_PnP::pollUSB()
             }
 
             qDebug() << "Config saved";
+            hid_state(HID_DATA);
         }
     }
 }
 
 void HID_PnP::closeDevice()
 {
+
     if (deviceLog != nullptr) {
         hid_close(deviceLog);
         deviceLog = nullptr;
@@ -286,7 +307,9 @@ void HID_PnP::closeDevice()
     }
     ui_data.isConnectedData = false;
 
-    hid_comm_update(ui_data.isConnectedData, ui_data);
+    // notify UI connect was lost
+    hid_state(HID_DATA);
+    hid_connect_status(connectLogErrCnt < HID_CONNECT_FAIL_MAX || connectDataErrCnt < HID_CONNECT_FAIL_MAX, false, false);
 
     if (timer != nullptr) {
         timer->start(250);

@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
+import BackEnd 1.0
 
 Item {
     property string title
@@ -13,13 +14,13 @@ Item {
 
     function renderMode(mode) {
         switch (mode) {
-        case 0:
+        case BackEnd.ControlMode.Tbl:
             return "%-table";
-        case 1:
+        case BackEnd.ControlMode.PID:
             return "PID";
-        case 2:
+        case BackEnd.ControlMode.Fixed:
             return "Fixed";
-        case 3:
+        case BackEnd.ControlMode.Off:
             return "Off";
         }
         return "ERR";
@@ -27,17 +28,17 @@ Item {
 
     function renderSource(source) {
         switch (source) {
-        case 0:
+        case BackEnd.WaterSupplyTemp:
             return "Water Supply Temp";
-        case 1:
+        case BackEnd.WaterReturnTemp:
             return "Water Return Temp";
-        case 2:
+        case BackEnd.CaseTemp:
             return "Case Temp";
-        case 3:
+        case BackEnd.Aux1Temp:
             return "Aux1 Temp";
-        case 4:
+        case BackEnd.Aux2Temp:
             return "Aux2 Temp";
-        case 5:
+        case BackEnd.VirtualDeltaT:
             return "DeltaT";
         }
         return "ERR";
@@ -90,7 +91,7 @@ Item {
             minWidth: 155
             label: qsTr("Source")
             text: qsTr(renderSource(fan.pv.source))
-            visible: fan.pv.mode < 2
+            visible: fan.pv.mode < BackEnd.ControlMode.Fixed
         }
         Item {
             Layout.preferredHeight: 59
@@ -99,7 +100,7 @@ Item {
             Layout.maximumWidth: 235
             Layout.fillWidth: true
             height: 20
-            visible: fan.pv.mode >= 2
+            visible: fan.pv.mode >= BackEnd.ControlMode.Fixed
         }
 
         // force left alignment as width grows

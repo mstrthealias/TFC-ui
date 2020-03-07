@@ -9,6 +9,9 @@ ApplicationWindow {
     height: 800
     title: qsTr("Teensy Fan Controller")
 
+    property int uiState: BackEnd.Connecting
+    property int hidState: BackEnd.HidData
+
     // triggered when save is clicked; components optionally connected-to for before-save validation
     signal beforeSave()
 
@@ -17,7 +20,46 @@ ApplicationWindow {
         objectName: 'backEnd'
     }
 
+    // log window is always active when application is running (shown using hdr button)
+    LogWindow {
+        id: logWindow
+        visible: false
+        x: window.width + window.x - 5
+        y: window.y
+        onVisibleChanged: {
+            logPageButton.highlighted = visible;
+        }
+    }
+
+    Connections {
+        target: backEnd
+        onHidConnectStatus: function(connecting, dataOnline, logOnline) {
+            if (connecting)
+                uiState = BackEnd.Connecting;
+            else if (dataOnline && logOnline)
+                uiState = BackEnd.Online;
+            else if (logOnline)
+                uiState = BackEnd.NoData;
+            else if (dataOnline)
+                uiState = BackEnd.NoLog;
+            else
+                uiState = BackEnd.Offline;
+        }
+        onHidState: function(state) {
+            if (state === hidState)
+                return;
+            hidState = state;
+        }
+    }
+
+    function doReconnect() {
+        uiState = BackEnd.Connecting;
+        console.log('Reset connection retry limits');
+        backEnd.reconnect();
+    }
+
     header: ToolBar {
+        id: mainToolbar
         contentHeight: toolButton.implicitHeight
 
         ToolButton {
@@ -36,55 +78,47 @@ ApplicationWindow {
         }
 
         Label {
+            id: hdrLabel
             text: stackView.currentItem.title
             anchors.centerIn: parent
         }
 
-        Rectangle {
-            id: noDataConnection
-            visible: false
-            height: 25
-            width: Math.max(155, window.width * 0.35)
-            anchors.right: parent.right
-            color: "yellow"
-            border.color: "#b4b4b4"
-            border.width: 1
-            Label {
-                text: qsTr("NO DATA CONNECTION")
-                color: "#333333"
-                anchors.centerIn: parent
-                font.pixelSize: Qt.application.font.pixelSize * 1.4
+        ToolButton {
+            id: statusButton
+            icon.source: "images/worldwide.svg"
+            icon.height: 20
+            icon.width: 20
+            icon.color: uiState === BackEnd.Offline ? 'red' : (uiState === BackEnd.Online ? '#ededed' : (uiState === BackEnd.Connecting ? 'gray' : 'yellow'))
+            display: AbstractButton.IconOnly
+            anchors.left: hdrLabel.right
+
+
+            ToolTip {
+                visible: parent.hovered
+                text: qsTr(uiState === BackEnd.Offline ? "Log Not Connected\nData Not Connected" : (uiState === BackEnd.Connecting ? 'Connecting' : (uiState === BackEnd.NoLog ? 'Log Not Connected' : (uiState === BackEnd.NoData ? 'Data Not Connected' : 'Connected'))))
+            }
+
+            onClicked: {
+                if (hidState !== BackEnd.HidData)
+                    return;
+                if (uiState !== BackEnd.Online && uiState !== BackEnd.Connecting) {
+                    doReconnect();
+                }
             }
         }
 
-        Rectangle {
-            id: noLogConnection
-            visible: false
-            height: 25
-            width: Math.max(155, window.width * 0.35)
+        ToolButton {
+            id: logPageButton
+            icon.source: "images/log.svg"
+            icon.height: 20
+            icon.width: 20
+            display: AbstractButton.IconOnly
             anchors.right: parent.right
-            anchors.top: noDataConnection.bottom
-            anchors.topMargin: 5
-            color: "yellow"
-            border.color: "#b4b4b4"
-            border.width: 1
-            Label {
-                text: qsTr("NO LOG CONNECTION")
-                color: "#333333"
-                anchors.centerIn: parent
-                font.pixelSize: Qt.application.font.pixelSize * 1.4
-            }
-        }
-
-        Connections {
-            target: backEnd
-            onHidConnectFailure: function(isDataConnection) {
-                if (isDataConnection) {
-                    noDataConnection.visible = true
-                }
-                else {
-                    noLogConnection.visible = true
-                }
+            onClicked: {
+                if (!highlighted)
+                    logWindow.show()
+                else
+                    logWindow.hide()
             }
         }
     }
@@ -100,6 +134,8 @@ ApplicationWindow {
             text: qsTr("Save")
             font.pixelSize: Qt.application.font.pixelSize
             onClicked: {
+                if (hidState !== BackEnd.HidData)
+                    return;
                 window.beforeSave()
                 backEnd.save()
             }
@@ -113,15 +149,6 @@ ApplicationWindow {
 
         Column {
             anchors.fill: parent
-
-            ItemDelegate {
-                text: qsTr("Present Values")
-                width: parent.width
-                onClicked: {
-                    stackView.push("pv.qml")
-                    drawer.close()
-                }
-            }
             ItemDelegate {
                 text: qsTr("Fan Setup")
                 width: parent.width
@@ -140,15 +167,17 @@ ApplicationWindow {
                     drawer.close()
                 }
             }
-//            ItemDelegate {
-//                text: qsTr("Serial Log")
-//                width: parent.width
-//                onClicked: {
-//                    editToolbar.visible = false
-//                    stackView.push("log.qml")
-//                    drawer.close()
-//                }
-//            }
+            ItemDelegate {
+                text: qsTr("Log")
+                width: parent.width
+                onClicked: {
+                    if (logWindow.visible)
+                        logWindow.requestActivate()
+                    else
+                        logWindow.show()
+                    drawer.close()
+                }
+            }
 //            ItemDelegate {
 //                text: qsTr("Graph")
 //                width: parent.width
@@ -163,7 +192,49 @@ ApplicationWindow {
     StackView {
         id: stackView
         objectName: 'stackView'
-        initialItem: "log.qml"
+        initialItem: "pv.qml"
         anchors.fill: parent
     }
+
+    // Not Connected indicator
+    Rectangle {
+        id: uiIndicator
+        visible: uiState === BackEnd.Connecting || uiState === BackEnd.Offline || uiState === BackEnd.NoData
+        height: 25
+        width: 135
+        anchors.top: mainToolbar.bottom
+        anchors.right: parent.right
+        color: "transparent"
+        Label {
+            text: qsTr("\u26a0 NOT CONNECTED")
+            color: "#333333"
+            anchors.centerIn: parent
+            font.pixelSize: Qt.application.font.pixelSize * 1.4
+        }
+    }
+
+    // Config Download indicator
+    Rectangle {
+        visible: !uiIndicator.visible && hidState !== BackEnd.HidData
+        height: 25
+        width: 205
+        anchors.top: mainToolbar.bottom
+        anchors.right: parent.right
+        color: "transparent"
+        Label {
+            text: qsTr(hidState === BackEnd.HidConfig ? "\u26a0 DOWNLOADING CONFIGURATION" : "\u26a0 SAVING CONFIGURATION")
+            color: "#333333"
+            anchors.centerIn: parent
+            font.pixelSize: Qt.application.font.pixelSize * 1.4
+        }
+    }
+
+    // Darken screen when Not Connected or config download/upload is active
+    Rectangle {
+        anchors.fill: parent
+        opacity: 0.35
+        color: 'gray'
+        visible: hidState !== BackEnd.HidData || uiState === BackEnd.Connecting
+    }
+
 }

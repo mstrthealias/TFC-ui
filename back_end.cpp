@@ -625,8 +625,8 @@ BackEnd::BackEnd(QObject *parent) :
     sensor4Config = new BackEndSensor(m_config.tempAux1, this);
     sensor5Config = new BackEndSensor(m_config.tempAux2, this);
 
-    connect(ctrl, SIGNAL(hid_connect_failure(bool)), this, SIGNAL(hidConnectFailure(bool)));
-
+    connect(ctrl, SIGNAL(hid_connect_status(const bool, const bool, const bool)), this, SIGNAL(hidConnectStatus(const bool, const bool, const bool)));
+    connect(ctrl, SIGNAL(hid_state(const quint8)), this, SIGNAL(hidState(const quint8)));
     connect(ctrl, SIGNAL(hid_comm_update(bool, UI_Data)), this, SLOT(update_gui(bool, UI_Data)));
     connect(ctrl, SIGNAL(log_append(bool, QString)), this, SLOT(update_log(bool, QString)));
     connect(ctrl, SIGNAL(hid_config_download(bool, RuntimeConfig)), this, SLOT(update_config(bool, RuntimeConfig)));
@@ -640,6 +640,8 @@ BackEnd::BackEnd(QObject *parent) :
 BackEnd::~BackEnd()
 {
     if (ctrl != nullptr) {
+        disconnect(ctrl, SIGNAL(hid_connect_status(const bool, const bool, const bool)), this, SIGNAL(hidConnectStatus(const bool, const bool, const bool)));
+        disconnect(ctrl, SIGNAL(hid_state(const quint8)), this, SIGNAL(hidState(const quint8)));
         disconnect(ctrl, SIGNAL(hid_comm_update(bool, UI_Data)), this, SLOT(update_gui(bool, UI_Data)));
         disconnect(ctrl, SIGNAL(log_append(bool, QString)), this, SLOT(update_log(bool, QString)));
         disconnect(ctrl, SIGNAL(hid_config_download(bool, RuntimeConfig)), this, SLOT(update_config(bool, RuntimeConfig)));
@@ -715,6 +717,11 @@ BackEnd::~BackEnd()
     return true;
 }
 
+/*Q_INVOKABLE */void BackEnd::reconnect()
+{
+    ctrl->reconnect();
+}
+
 void BackEnd::checkUsages()
 {
     sensor1Config->checkUsage(m_config, CONTROL_SOURCE::SENSOR_WATER_SUPPLY_TEMP);
@@ -775,6 +782,8 @@ void BackEnd::update_config(bool isConnected, const RuntimeConfig &config)
     emit fan6Changed();
 
     checkUsages();
+
+    emit configDownloaded();
 }
 
 BackEndPID* BackEnd::pid1() const

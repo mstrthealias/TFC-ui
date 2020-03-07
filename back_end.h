@@ -41,6 +41,7 @@ private:
     quint8 m_source = 0;
 };
 
+
 class BackEndFan : public QObject
 {
     Q_OBJECT
@@ -242,10 +243,46 @@ private:
 };
 
 
-
 class BackEnd : public QObject
 {
+public:
+    // QML enum for connection state
+    enum class UiState : uint8_t {
+        Offline,
+        Online,
+        Connecting,
+        NoLog,   // DATA is connected
+        NoData,  // LOG is connected
+    };
+    // QML enum for HID state
+    enum class HidState : uint8_t {
+        HidData,
+        HidConfig,
+        HidDownload,
+    };
+    // QML enum representing CONTROL_MODE enum
+    enum class ControlMode : uint8_t {
+        Tbl,
+        PID,
+        Fixed,
+        Off
+    };
+    // QML enum representing CONTROL_SOURCE enum
+    enum class ControlSource : uint8_t {
+        WaterSupplyTemp,
+        WaterReturnTemp,
+        CaseTemp,
+        Aux1Temp,
+        Aux2Temp,
+        VirtualDeltaT
+    };
+
+private:
     Q_OBJECT
+    Q_ENUM(UiState)
+    Q_ENUM(HidState)
+    Q_ENUM(ControlMode)
+    Q_ENUM(ControlSource)
     // configuration
     Q_PROPERTY(BackEndPID* pid1 READ pid1 WRITE setPid1 NOTIFY pid1Changed)
     Q_PROPERTY(BackEndPID* pid2 READ pid2 WRITE setPid2 NOTIFY pid2Changed)
@@ -272,9 +309,11 @@ public slots:
     void update_config(bool isConnected, const RuntimeConfig &config);
 
 signals:
-    void hidConnectFailure(bool isDataConnection);
+    void hidState(const quint8 state);
+    void hidConnectStatus(const bool connecting, const bool dataOnline, const bool logOnline);
     void logAppend(QString log);
     void saveConfig(const RuntimeConfig &config);
+    void configDownloaded();
 
     void pid1Changed();
     void pid2Changed();
@@ -298,6 +337,7 @@ public:
     explicit BackEnd(QObject *parent = nullptr);
     ~BackEnd();
 
+    Q_INVOKABLE void reconnect();
     Q_INVOKABLE bool save();
 
     void checkUsages();

@@ -50,10 +50,13 @@ public:
     explicit HID_PnP(QObject *parent = nullptr);
     ~HID_PnP();
 
+    void reconnect();
+
 signals:
     void hid_config_download(bool isConnected, const RuntimeConfig &config);
     void hid_comm_update(bool isConnected, const UI_Data &ui_data);
-    void hid_connect_failure(bool isDataConnection);
+    void hid_connect_status(const bool connecting, const bool dataOnline, const bool logOnline);
+    void hid_state(const quint8 state);
     void log_append(bool isConnected, QString str);
 
 public slots:

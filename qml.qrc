@@ -3,7 +3,7 @@
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>pv.qml</file>
-        <file>log.qml</file>
+        <file>LogWindow.qml</file>
         <file>hardware.qml</file>
         <file>HardwareFan.qml</file>
         <file>ControlPID.qml</file>
@@ -16,5 +16,7 @@
         <file>TextFieldExt.qml</file>
         <file>PVFan.qml</file>
         <file>PVSensor.qml</file>
+        <file>images/log.svg</file>
+        <file>images/worldwide.svg</file>
     </qresource>
 </RCC>

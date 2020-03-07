@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
+import BackEnd 1.0
 
 Item {
     property string title
@@ -10,23 +11,57 @@ Item {
     Layout.fillWidth: true
     height: 149
 
+    function populateSourceOptions() {
+        let idx = fieldSource.currentIndex,
+            mdl = fieldSource.model,
+            record = mdl.get(idx),
+            firstVal = null,
+            selVal = record ? record.val : BackEnd.WaterSupplyTemp,  // uses initial ListElements
+            cur = 0;
+        idx = 0;
+        function appendElement(obj) {
+            if (firstVal === null)
+                firstVal = obj.val;
+            mdl.append({ val: obj.val, text: obj.text });
+            if (obj.val === selVal)
+                idx = cur;
+            cur++;
+        }
+
+        mdl.clear();
+        if (backEnd.sensor1.pin)
+            appendElement({ val: BackEnd.WaterSupplyTemp, text: qsTr("Water Supply Temp") });
+        if (backEnd.sensor2.pin)
+            appendElement({ val: BackEnd.WaterReturnTemp, text: qsTr("Water Return Temp") });
+        if (backEnd.sensor3.pin)
+            appendElement({ val: BackEnd.CaseTemp, text: qsTr("Case Temp") });
+        if (backEnd.sensor4.pin)
+            appendElement({ val: BackEnd.Aux1Temp, text: qsTr("Aux1 Temp") });
+        if (backEnd.sensor5.pin)
+            appendElement({ val: BackEnd.Aux2Temp, text: qsTr("Aux2 Temp") });
+        if (backEnd.sensor1.pin && backEnd.sensor2.pin)
+            appendElement({ val: BackEnd.VirtualDeltaT, text: qsTr("DeltaT (Return - Supply Temp)") });
+        fieldSource.currentIndex = idx;
+        fieldSource.val = (idx !== 0 ? selVal : firstVal) || BackEnd.WaterSupplyTemp;
+    }
+
     function showFanPID(source, fanNo) {
         let valid = true,
             pid, pidTitle;
         switch (source) {
-        case 0:
+        case BackEnd.WaterSupplyTemp:
             pidTitle = "Supply Temp PID"
             pid = backEnd.pid1
             break;
-        case 2:
+        case BackEnd.CaseTemp:
             pidTitle = "Case Temp PID"
             pid = backEnd.pid2
             break;
-        case 3:
+        case BackEnd.Aux1Temp:
             pidTitle = "Aux1 Temp PID"
             pid = backEnd.pid3
             break;
-        case 4:
+        case BackEnd.Aux2Temp:
             pidTitle = "Aux2 Temp PID"
             pid = backEnd.pid4
             break;
@@ -46,22 +81,22 @@ Item {
     function showFanTbl(fan, fanNo) {
         let tblTitle;
         switch (fan.source) {
-        case 0:
+        case BackEnd.WaterSupplyTemp:
             tblTitle = "Supply Temp - % Table"
             break;
-        case 1:
+        case BackEnd.WaterReturnTemp:
             tblTitle = "Return Temp - % Table"
             break;
-        case 2:
+        case BackEnd.CaseTemp:
             tblTitle = "Case Temp - % Table"
             break;
-        case 3:
+        case BackEnd.Aux1Temp:
             tblTitle = "Aux1 Temp - % Table"
             break;
-        case 4:
+        case BackEnd.Aux2Temp:
             tblTitle = "Aux2 Temp - % Table"
             break;
-        case 5:
+        case BackEnd.VirtualDeltaT:
             tblTitle = "DeltaT - % Table"
             break;
         }
@@ -115,10 +150,10 @@ Item {
             }
 
             ComboBox {
-                property int val: 0
+                property int val: BackEnd.WaterSupplyTemp
 
                 id: fieldSource
-                visible: fan.mode === 0 || fan.mode === 1
+                visible: fan.mode === BackEnd.ControlMode.Tbl || fan.mode === BackEnd.ControlMode.PID
                 Layout.minimumWidth: 175
                 Layout.fillWidth: true
                 textRole: "text"
@@ -126,12 +161,12 @@ Item {
                 currentIndex: fan.source
 
                 model: ListModel {
-                    ListElement { val: 0; text: qsTr("Water Supply Temp") }
-                    ListElement { val: 1; text: qsTr("Water Return Temp") }
-                    ListElement { val: 2; text: qsTr("Case Temp") }
-                    ListElement { val: 3; text: qsTr("Aux1 Temp") }
-                    ListElement { val: 4; text: qsTr("Aux2 Temp") }
-                    ListElement { val: 5; text: qsTr("DeltaT (Return - Supply Temp)") }
+                    ListElement { val: BackEnd.WaterSupplyTemp; text: qsTr("Water Supply Temp") }
+                    ListElement { val: BackEnd.WaterReturnTemp; text: qsTr("Water Return Temp") }
+                    ListElement { val: BackEnd.CaseTemp; text: qsTr("Case Temp") }
+                    ListElement { val: BackEnd.Aux1Temp; text: qsTr("Aux1 Temp") }
+                    ListElement { val: BackEnd.Aux2Temp; text: qsTr("Aux2 Temp") }
+                    ListElement { val: BackEnd.VirtualDeltaT; text: qsTr("DeltaT (Return - Supply Temp)") }
                 }
 
                 onActivated: {
@@ -141,34 +176,7 @@ Item {
                 }
 
                 Component.onCompleted: {
-                    let idx = fieldSource.currentIndex,
-                        mdl = fieldSource.model,
-                        record = mdl.get(idx),
-                        selVal = record ? record.val : 0,  // uses initial ListElements
-                        cur = 0;
-
-                    function appendElement(obj) {
-                        mdl.append({ val: obj.val, text: obj.text });
-                        if (obj.val === selVal)
-                            idx = cur;
-                        cur++;
-                    }
-
-                    mdl.clear();
-                    if (backEnd.sensor1.pin)
-                        appendElement({ val: 0, text: qsTr("Water Supply Temp") });
-                    if (backEnd.sensor2.pin)
-                        appendElement({ val: 1, text: qsTr("Water Return Temp") });
-                    if (backEnd.sensor3.pin)
-                        appendElement({ val: 2, text: qsTr("Case Temp") });
-                    if (backEnd.sensor4.pin)
-                        appendElement({ val: 3, text: qsTr("Aux1 Temp") });
-                    if (backEnd.sensor5.pin)
-                        appendElement({ val: 4, text: qsTr("Aux2 Temp") });
-                    if (backEnd.sensor1.pin && backEnd.sensor2.pin)
-                        appendElement({ val: 5, text: qsTr("DeltaT (Return - Supply Temp)") });
-                    fieldSource.currentIndex = idx;
-                    fieldSource.val = selVal;
+                    populateSourceOptions();
                 }
 
                 Binding {
@@ -180,7 +188,7 @@ Item {
         RowLayout {
             ToolButton {
                 id: editTblButton
-                visible: fan.mode === 0
+                visible: fan.mode === BackEnd.ControlMode.Tbl
                 text: qsTr("Edit Table")
                 font.pixelSize: 16
                 Layout.margins: 4
@@ -191,7 +199,7 @@ Item {
 
             ToolButton {
                 id: editPIDButton
-                visible: fan.mode === 1
+                visible: fan.mode === BackEnd.ControlMode.PID
                 text: qsTr("Edit PID")
                 font.pixelSize: 16
                 Layout.margins: 4
@@ -202,12 +210,12 @@ Item {
 
             Item {
                 Layout.fillWidth: true
-                visible: fan.mode !== 2
+                visible: fan.mode !== BackEnd.ControlMode.Fixed
             }
 
             TextFieldExt {
                 id: fieldRatio
-                visible: fan.mode === 1 || fan.mode === 2
+                visible: fan.mode === BackEnd.ControlMode.PID || fan.mode === BackEnd.ControlMode.Fixed
                 horizontalAlignment: Qt.AlignHRight
                 Layout.minimumWidth: 95
                 Layout.maximumWidth: 95
