@@ -39,9 +39,8 @@ Item {
             tooltip: qsTr("The minimum % the PID is allowed to output.")
             text: pid ? pid.percentMin : 0
 
-            Binding {
-                target: pid; property: "percentMin"; value: fieldPercentMin.text
-            }
+            target: pid
+            property: "percentMin"
         }
         TextFieldExt {
             id: fieldPercentMax1
@@ -52,9 +51,8 @@ Item {
             tooltip: qsTr("The maximum % the PID is allowed to output, when setpoint < setpoint_max and the setpoint may step up.")
             text: pid ? pid.percentMax1 : 0
 
-            Binding {
-                target: pid; property: "percentMax1"; value: fieldPercentMax1.text
-            }
+            target: pid
+            property: "percentMax1"
         }
         Item {
             visible: !pid.adaptiveSP
@@ -69,9 +67,8 @@ Item {
             tooltip: qsTr("The maximum % the PID is allowed to output, when setpoint = setpoint_max or the setpoint is not allowed to step up (due to case temp delta).")
             text: pid ? pid.percentMax2 : 0
 
-            Binding {
-                target: pid; property: "percentMax2"; value: fieldPercentMax2.text
-            }
+            target: pid
+            property: "percentMax2"
         }
     }
     GridLayout {
@@ -90,9 +87,8 @@ Item {
             label: qsTr("Setpoint")
             text: pid ? pid.setpoint : 0
 
-            Binding {
-                target: pid; property: "setpoint"; value: fieldSetpoint.text
-            }
+            target: pid
+            property: "setpoint"
         }
         CheckBox {
             id: fieldAdaptiveSP
@@ -100,8 +96,8 @@ Item {
             text: qsTr("Automatically Adjust")
             checked: pid ? pid.adaptiveSP : 0
 
-            Binding {
-                target: pid; property: "adaptiveSP"; value: fieldAdaptiveSP.checked
+            onToggled: {
+                pid.adaptiveSP = fieldAdaptiveSP.checked
             }
         }
         Item {
@@ -123,9 +119,8 @@ Item {
             label: qsTr("Gain (P)")
             text: pid ? pid.gainP : 0
 
-            Binding {
-                target: pid; property: "gainP"; value: fieldGainP.text
-            }
+            target: pid
+            property: "gainP"
         }
         TextFieldExt {
             id: fieldGainI
@@ -133,9 +128,8 @@ Item {
             label: qsTr("Gain (I)")
             text: pid ? pid.gainI : 0
 
-            Binding {
-                target: pid; property: "gainI"; value: fieldGainI.text
-            }
+            target: pid
+            property: "gainI"
         }
         TextFieldExt {
             id: fieldGainD
@@ -143,9 +137,8 @@ Item {
             label: qsTr("Gain (D)")
             text: pid ? pid.gainD : 0
 
-            Binding {
-                target: pid; property: "gainD"; value: fieldGainD.text
-            }
+            target: pid
+            property: "gainD"
         }
     }
 
@@ -187,9 +180,8 @@ Item {
                 label: qsTr("Setpoint Min (°C)")
                 text: pid ? pid.setpointMin : 0
 
-                Binding {
-                    target: pid; property: "setpointMin"; value: fieldSetpointMin.text
-                }
+                target: pid
+                property: "setpointMin"
             }
             TextFieldExt {
                 id: fieldSetpointMax
@@ -198,9 +190,8 @@ Item {
                 label: qsTr("Setpoint Max (°C)")
                 text: pid ? pid.setpointMax : 0
 
-                Binding {
-                    target: pid; property: "setpointMax"; value: fieldSetpointMax.text
-                }
+                target: pid
+                property: "setpointMax"
             }
             TextFieldExt {
                 id: fieldStepSize
@@ -209,9 +200,8 @@ Item {
                 label: qsTr("Step Size (°C)")
                 text: pid ? pid.adaptiveSPStepSize : 0
 
-                Binding {
-                    target: pid; property: "adaptiveSPStepSize"; value: fieldStepSize.text
-                }
+                target: pid
+                property: "adaptiveSPStepSize"
             }
 
             Item {
@@ -227,8 +217,8 @@ Item {
                 text: qsTr("Use Case Temp")
                 checked: pid ? pid.adaptiveSPUseCaseTemp : 0
 
-                Binding {
-                    target: pid; property: "adaptiveSPUseCaseTemp"; value: fieldUseCaseTemp.checked
+                onToggled: {
+                    pid.adaptiveSPUseCaseTemp = fieldUseCaseTemp.checked
                 }
             }
 
@@ -239,9 +229,8 @@ Item {
                 label: qsTr("Step-Up If Fan % Above (%)")
                 text: pid ? pid.adaptiveSPStepUp.pct : 0
 
-                Binding {
-                    target: pid.adaptiveSPStepUp; property: "pct"; value: fieldStepUpPct.text
-                }
+                target: pid.adaptiveSPStepUp
+                property: "pct"
             }
             TextFieldExt {
                 id: fieldStepUpDelay
@@ -250,9 +239,8 @@ Item {
                 label: qsTr("For (seconds)")
                 text: pid ? pid.adaptiveSPStepUp.delay : 0
 
-                Binding {
-                    target: pid.adaptiveSPStepUp; property: "delay"; value: fieldStepUpDelay.text
-                }
+                target: pid.adaptiveSPStepUp
+                property: "delay"
             }
             TextFieldExt {
                 id: fieldStepUpCaseTempDelta
@@ -262,9 +250,8 @@ Item {
                 label: qsTr("And Case Temp Delta Below (°C)")
                 text: pid ? pid.adaptiveSPStepUp.caseTempDelta : 0
 
-                Binding {
-                    target: pid.adaptiveSPStepUp; property: "caseTempDelta"; value: fieldStepUpCaseTempDelta.text
-                }
+                target: pid.adaptiveSPStepUp
+                property: "caseTempDelta"
             }
             Item {
                 visible: !fieldUseCaseTemp.checked
@@ -280,9 +267,8 @@ Item {
                 label: qsTr("Step-Down If Fan % Below (%)")
                 text: pid ? pid.adaptiveSPStepDown.pct : 0
 
-                Binding {
-                    target: pid.adaptiveSPStepDown; property: "pct"; value: fieldStepDownPct.text
-                }
+                target: pid.adaptiveSPStepDown
+                property: "pct"
             }
             TextFieldExt {
                 id: fieldStepDownDelay
@@ -291,9 +277,8 @@ Item {
                 label: qsTr("For (seconds)")
                 text: pid ? pid.adaptiveSPStepDown.delay : 0
 
-                Binding {
-                    target: pid.adaptiveSPStepDown; property: "delay"; value: fieldStepDownDelay.text
-                }
+                target: pid.adaptiveSPStepDown
+                property: "delay"
             }
             TextFieldExt {
                 id: fieldStepDownCaseTempDelta
@@ -303,9 +288,8 @@ Item {
                 label: qsTr("And Case Temp Delta Above (°C)")
                 text: pid ? pid.adaptiveSPStepDown.caseTempDelta : 0
 
-                Binding {
-                    target: pid.adaptiveSPStepDown; property: "caseTempDelta"; value: fieldStepDownCaseTempDelta.text
-                }
+                target: pid.adaptiveSPStepDown
+                property: "caseTempDelta"
             }
             Item {
                 visible: !fieldUseCaseTemp.checked

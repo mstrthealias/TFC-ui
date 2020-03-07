@@ -39,9 +39,8 @@ Item {
             tooltip: qsTr("Teensy (actual) pin number (must support Analog/ADC).")
             text: sensor.pin
 
-            Binding {
-                target: sensor; property: "pin"; value: fieldPin.text
-            }
+            target: sensor
+            property: "pin"
         }
 
         TextFieldExt {
@@ -51,9 +50,8 @@ Item {
             tooltip: qsTr("Series resistor used to pull-up thermistor, adjust this to calibrate reading.")
             text: sensor.seriesR
 
-            Binding {
-                target: sensor; property: "seriesR"; value: fieldSeriesR.text
-            }
+            target: sensor
+            property: "seriesR"
         }
 
         TextFieldExt {
@@ -63,9 +61,8 @@ Item {
             tooltip: qsTr("Thermistor resistance, usually 10000 (for 10K thermistor).")
             text: sensor.nominalR
 
-            Binding {
-                target: sensor; property: "nominalR"; value: fieldNominalR.text
-            }
+            target: sensor
+            property: "nominalR"
         }
 
         TextFieldExt {
@@ -75,9 +72,8 @@ Item {
             tooltip: qsTr("Thermistor Beta coefficient, usually between 3000-4000.")
             text: sensor.beta
 
-            Binding {
-                target: sensor; property: "beta"; value: fieldBeta.text
-            }
+            target: sensor
+            property: "beta"
         }
     }
 

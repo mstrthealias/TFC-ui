@@ -11,6 +11,13 @@ Item {
     Layout.fillWidth: true
     height: 149
 
+    Connections {
+        target: backEnd
+        onConfigDownloaded: function() {
+            populateSourceOptions();
+        }
+    }
+
     function populateSourceOptions() {
         let idx = fieldSource.currentIndex,
             mdl = fieldSource.model,
@@ -43,6 +50,7 @@ Item {
             appendElement({ val: BackEnd.VirtualDeltaT, text: qsTr("DeltaT (Return - Supply Temp)") });
         fieldSource.currentIndex = idx;
         fieldSource.val = (idx !== 0 ? selVal : firstVal) || BackEnd.WaterSupplyTemp;
+        fan.source = fieldSource.val  // make sure config is up to date
     }
 
     function showFanPID(source, fanNo) {
@@ -144,8 +152,8 @@ Item {
                     ListElement { text: qsTr("Off") }
                 }
 
-                Binding {
-                    target: fan; property: "mode"; value: fieldMode.currentIndex
+                onActivated: {
+                    fan.mode = fieldMode.currentIndex
                 }
             }
 
@@ -173,14 +181,11 @@ Item {
                     let rec = fieldSource.model.get(index);
                     if (rec)
                         fieldSource.val = rec.val;
+                    fan.source = fieldSource.val;
                 }
 
                 Component.onCompleted: {
                     populateSourceOptions();
-                }
-
-                Binding {
-                    target: fan; property: "source"; value: fieldSource.val
                 }
             }
         }
@@ -224,9 +229,8 @@ Item {
                 tooltip: qsTr("Fan Ratio: set a value less than 1 to reduce this fan's speed, set a value greater than 1 to increase this fan's speed. Note: fan ratio is applied after PID and %-table calculations.")
                 text: fan.ratio
 
-                Binding {
-                    target: fan; property: "ratio"; value: fieldRatio.text
-                }
+                target: fan
+                property: "ratio"
             }
         }
     }

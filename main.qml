@@ -14,6 +14,8 @@ ApplicationWindow {
 
     // triggered when save is clicked; components optionally connected-to for before-save validation
     signal beforeSave()
+    // trigger when a view is closed
+    signal beforeClose()
 
     BackEnd {
         id: backEnd
@@ -70,6 +72,7 @@ ApplicationWindow {
                 if (stackView.depth > 1) {
                     if (stackView.depth == 2)
                         editToolbar.visible = false;
+                    beforeClose()  // make sure any changes are not list
                     stackView.pop()
                 } else {
                     drawer.open()

@@ -9,6 +9,10 @@ TextField {
     property int minWidth: 115
     property var labelColor
 
+    // handle changes internally
+    property var target: null
+    property string property: ""
+
     Layout.preferredHeight: 59
     Layout.minimumHeight: 59
 
@@ -16,6 +20,23 @@ TextField {
     Layout.fillWidth: true
 
     verticalAlignment: Text.AlignBottom
+
+    // flush changes before writing to device (or closing view)
+    Connections {
+        target: window
+        onBeforeSave: function() {
+            saveChanges()
+        }
+        onBeforeClose: function() {
+            saveChanges()
+        }
+    }
+
+    function saveChanges() {
+        if (target && property) {
+            target[property] = text
+        }
+    }
 
     Label {
         text: label
@@ -35,6 +56,10 @@ TextField {
             else
                 deselect();
         }
+
+        // flush changes when focus lost
+        if (!focus)
+            saveChanges()
     }
 
 }

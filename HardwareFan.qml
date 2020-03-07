@@ -40,9 +40,8 @@ Item {
             tooltip: qsTr("Teensy pin number (must support PWM). Set to 0 if not connected.")
             text: fan.pinPWM
 
-            Binding {
-                target: fan; property: "pinPWM"; value: fieldPinPWM.text
-            }
+            target: fan
+            property: "pinPWM"
         }
 
         TextFieldExt {
@@ -53,9 +52,8 @@ Item {
             tooltip: qsTr("Teensy pin number (must support interrupts). Set to 0 if not connected.")
             text: fan.pinRPM
 
-            Binding {
-                target: fan; property: "pinRPM"; value: fieldPinRPM.text
-            }
+            target: fan
+            property: "pinRPM"
         }
 
     }

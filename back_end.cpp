@@ -774,12 +774,24 @@ void BackEnd::update_config(bool isConnected, const RuntimeConfig &config)
 
     m_config = config;
 
+    // trigger change on all properties
+    emit pid1Changed();
+    emit pid2Changed();
+    emit pid3Changed();
+    emit pid4Changed();
+
     emit fan1Changed();
     emit fan2Changed();
     emit fan3Changed();
     emit fan4Changed();
     emit fan5Changed();
     emit fan6Changed();
+
+    emit sensor1Changed();
+    emit sensor2Changed();
+    emit sensor3Changed();
+    emit sensor4Changed();
+    emit sensor5Changed();
 
     checkUsages();
 

@@ -18,6 +18,10 @@ Item {
         onBeforeSave: function() {
             save()
         }
+        // make sure changes are flushed to config, when back button is pressed
+        onBeforeClose: function() {
+            save()
+        }
     }
 
     function load() {
