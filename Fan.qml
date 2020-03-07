@@ -200,7 +200,7 @@ Item {
             ToolButton {
                 id: editPIDButton
                 visible: fan.mode === BackEnd.ControlMode.PID
-                text: qsTr("Edit PID")
+                text: qsTr("Edit PID Settings")
                 font.pixelSize: 16
                 Layout.margins: 4
                 onClicked: {

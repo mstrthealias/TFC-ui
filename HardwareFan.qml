@@ -37,7 +37,7 @@ Item {
 
             minWidth: fieldMinWidth
             label: qsTr("PWM Pin")
-            tooltip: qsTr("Teensy pin number (must support PWM). Set to 0 if not connected, or to not control fan's PWM signal.")
+            tooltip: qsTr("Teensy pin number (must support PWM). Set to 0 if not connected.")
             text: fan.pinPWM
 
             Binding {
@@ -50,7 +50,7 @@ Item {
 
             minWidth: fieldMinWidth
             label: qsTr("RPM Pin")
-            tooltip: qsTr("Teensy pin number (must support interrupts). Set to 0 if not connected, or to not monitor fan's RPM.")
+            tooltip: qsTr("Teensy pin number (must support interrupts). Set to 0 if not connected.")
             text: fan.pinRPM
 
             Binding {

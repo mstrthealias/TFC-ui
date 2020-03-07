@@ -56,6 +56,11 @@ Item {
                 target: pid; property: "percentMax1"; value: fieldPercentMax1.text
             }
         }
+        Item {
+            visible: !pid.adaptiveSP
+            Layout.minimumWidth: 155
+            Layout.fillWidth: true
+        }
         TextFieldExt {
             id: fieldPercentMax2
 
@@ -210,10 +215,12 @@ Item {
             }
 
             Item {
-                Layout.minimumWidth: 90
+                Layout.minimumWidth: 125
+                Layout.fillWidth: true
             }
             Item {
-                Layout.minimumWidth: 90
+                Layout.minimumWidth: 125
+                Layout.fillWidth: true
             }
             CheckBox {
                 id: fieldUseCaseTemp
@@ -261,7 +268,8 @@ Item {
             }
             Item {
                 visible: !fieldUseCaseTemp.checked
-                Layout.minimumWidth: 90
+                Layout.minimumWidth: 195
+                Layout.fillWidth: true
             }
 
 
@@ -301,7 +309,8 @@ Item {
             }
             Item {
                 visible: !fieldUseCaseTemp.checked
-                Layout.minimumWidth: 90
+                Layout.minimumWidth: 215
+                Layout.fillWidth: true
             }
         }
     }

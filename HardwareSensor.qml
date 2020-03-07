@@ -48,7 +48,7 @@ Item {
             id: fieldSeriesR
             minWidth: fieldMinWidth
             label: qsTr("Series Resistor (Ohm)")
-            tooltip: qsTr("Series resistor used to pull-up thermistor, adjust this to calibrate reading. Note: use a 10k resistor for 10k thermistor.")
+            tooltip: qsTr("Series resistor used to pull-up thermistor, adjust this to calibrate reading.")
             text: sensor.seriesR
 
             Binding {
