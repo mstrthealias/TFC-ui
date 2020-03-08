@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Teensy Fan Controller</Name>
+    <Version>0.1.0.0</Version>
+    <Title>Teensy Fan Controller</Title>
+    <Publisher>mstrthealias</Publisher>
+    <ProductUrl>https://github.com/mstrthealias/TeensyFanController</ProductUrl>
+    <!-- Directory name is used in component.xml -->
+    <StartMenuDir>Teensy Fan Controller</StartMenuDir>
+    <TargetDir>@ApplicationsDirX64@/TeensyFanController</TargetDir>
+    <Logo>installerlogo.png</Logo>
+    <InstallerWindowIcon>installericon</InstallerWindowIcon>
+    <InstallerApplicationIcon>installericon</InstallerApplicationIcon>
+    <WizardStyle>Modern</WizardStyle>
+</Installer>
