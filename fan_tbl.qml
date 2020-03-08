@@ -12,7 +12,7 @@ Page {
     width: parent ? parent.width : 0
     height: parent ? parent.height : 0
 
-    title: fanTitle + " > " + qsTr("Percent Table Setup")
+    title: fanTitle + ": " + qsTr("Percent Table Setup")
 
     function load() {
         tblView.load()

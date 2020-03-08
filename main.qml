@@ -90,6 +90,7 @@ ApplicationWindow {
             id: hdrLabel
             text: stackView.currentItem.title
             anchors.centerIn: parent
+            font.capitalization: Font.AllUppercase
         }
 
         ToolButton {
@@ -229,9 +230,10 @@ ApplicationWindow {
         anchors.right: parent.right
         color: "transparent"
         Label {
-            text: qsTr("\u26a0 NOT CONNECTED")
+            text: qsTr("\u26a0 Not Connected")
             color: "#333333"
             anchors.centerIn: parent
+            font.capitalization: Font.AllUppercase
         }
     }
 
@@ -244,9 +246,10 @@ ApplicationWindow {
         anchors.right: parent.right
         color: "transparent"
         Label {
-            text: qsTr(hidState === BackEnd.HidConfig ? "\u26a0 DOWNLOADING CONFIGURATION" : "\u26a0 SAVING CONFIGURATION")
+            text: qsTr(hidState === BackEnd.HidConfig ? "\u26a0 Downloading Configuration" : "\u26a0 Saving Configuration")
             color: "#333333"
             anchors.centerIn: parent
+            font.capitalization: Font.AllUppercase
         }
     }
 
