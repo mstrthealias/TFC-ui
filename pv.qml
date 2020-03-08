@@ -24,13 +24,10 @@ Page {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                Text {
+                Label {
                     text: qsTr("Sensors")
-                    lineHeight: 1.2
-                    Layout.minimumWidth: 105
-                    Layout.maximumWidth: 105
+                    Layout.fillHeight: true
                     verticalAlignment: Text.AlignTop
-                    font.pixelSize: 16
                     font.bold: true
                 }
 
@@ -72,13 +69,10 @@ Page {
                 anchors.right: parent.right
                 anchors.topMargin: 12
 
-                Text {
+                Label {
                     text: qsTr("Fans")
-                    lineHeight: 1.2
-                    Layout.minimumWidth: 105
-                    Layout.maximumWidth: 105
+                    horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignTop
-                    font.pixelSize: 16
                     font.bold: true
                 }
 

@@ -9,16 +9,14 @@ Item {
     Layout.fillWidth: true
     height: titleText.implicitHeight + pctGrid.implicitHeight + pidGrid.implicitHeight + gainGrid.implicitHeight + adjPage.implicitHeight + 155
 
-    Text {
+    Label {
         id: titleText
         text: title
-        height: 40
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 18
         font.bold: true
     }
 
@@ -27,7 +25,7 @@ Item {
         anchors.top: titleText.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 24
+        anchors.topMargin: 12
 
         columns: 3
 
@@ -151,17 +149,15 @@ Item {
         anchors.topMargin: 24
         visible: fieldAdaptiveSP.checked
 
-        Text {
+        Label {
             id: subtitleText
             text: qsTr("Setpoint Adjustment")
-            height: 33
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            font.pixelSize: 14
-            font.bold: true
+            font.capitalization: Font.AllUppercase
         }
 
         GridLayout {

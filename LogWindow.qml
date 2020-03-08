@@ -5,12 +5,14 @@ import BackEnd 1.0
 import LogListModel 0.1
 
 ApplicationWindow {
+    property int logMargin: 8
+
     id: logWindow
 
-    width: 555
-    height: 800
-
     title: qsTr("Log")
+
+    width: 455
+    height: 645
 
     header: ToolBar {
         id: logToolbar
@@ -19,7 +21,6 @@ ApplicationWindow {
         ToolButton {
             id: toolButton
             text: "\u25C0"
-            font.pixelSize: Qt.application.font.pixelSize * 1.6
             onClicked: {
                 logWindow.close()
             }
@@ -36,13 +37,28 @@ ApplicationWindow {
             icon.source: "images/worldwide.svg"
             icon.height: 20
             icon.width: 20
-            icon.color: uiState === BackEnd.Offline ? 'red' : (uiState === BackEnd.Online ? '#ededed' : (uiState === BackEnd.Connecting ? 'gray' : 'yellow'))
+            icon.color: {
+                return uiState === BackEnd.Offline
+                        ? 'red'
+                        : (uiState === BackEnd.Online
+                           ? '#ededed'
+                           : (uiState === BackEnd.Connecting ? 'gray' : 'yellow'))
+            }
             display: AbstractButton.IconOnly
             anchors.left: logHdrLabel.right
 
             ToolTip {
                 visible: parent.hovered
-                text: qsTr(uiState === BackEnd.Offline ? "Log Not Connected\nData Not Connected" : (uiState === BackEnd.Connecting ? 'Connecting' : (uiState === BackEnd.NoLog ? 'Log Not Connected' : (uiState === BackEnd.NoData ? 'Data Not Connected' : 'Connected'))))
+                text: {
+                    return qsTr(uiState === BackEnd.Offline
+                                ? "Log Not Connected\nData Not Connected"
+                                : (uiState === BackEnd.Connecting
+                                   ? 'Connecting'
+                                   : (uiState === BackEnd.NoLog
+                                      ? 'Log Not Connected'
+                                      : (uiState === BackEnd.NoData ? 'Data Not Connected' : 'Connected')))) +
+                            (uiState !== BackEnd.Online && uiState !== BackEnd.Connecting ? "\nClick to retry connection" : '')
+                }
             }
 
             onClicked: {
@@ -53,37 +69,50 @@ ApplicationWindow {
         }
     }
 
-    ScrollView {
+    ListView {
+        id: serialLog
         anchors.fill: parent
 
-        ListView {
-            id: serialLog
-            anchors.fill: parent
-            anchors.margins: 12
+        // for top/bottom margin
+        header: Item {
+            height: logMargin
+        }
+        footer: Item {
+            height: logMargin
+        }
 
-            model: LogListModel {
-                id: serialLogModel
+        // allow scroll in both directions, display scrollbars
+        flickableDirection: Flickable.AutoFlickIfNeeded
+        ScrollBar.vertical: ScrollBar { }
+        ScrollBar.horizontal: ScrollBar { }
+
+        model: LogListModel {
+            id: serialLogModel
+        }
+
+        delegate: Text {
+            text: model.display
+            leftPadding: logMargin
+            rightPadding: logMargin
+            Component.onCompleted: {
+                serialLog.contentWidth = Math.max(serialLog.contentWidth, contentWidth + leftPadding + rightPadding)
             }
+        }
 
-            delegate: Text {
-                text: model.display
+        Connections {
+            target: backEnd
+            onLogAppend: function(str) {
+                serialLogModel.add(str);
+                serialLog.positionViewAtIndex(serialLogModel.rowCount() - 1, ListView.End);
             }
-
-            Connections {
-                target: backEnd
-                onLogAppend: function(str) {
-                    serialLogModel.add(str);
-                    serialLog.positionViewAtIndex(serialLogModel.rowCount() - 1, ListView.End);
+            onHidConnectStatus: function(connecting, dataOnline, logOnline) {
+                if (!connecting && !dataOnline) {
+                    serialLogModel.add('Data connection failed');
                 }
-                onHidConnectStatus: function(connecting, dataOnline, logOnline) {
-                    if (!connecting && !dataOnline) {
-                        serialLogModel.add('Data connection failed');
-                    }
-                    if (!connecting && !logOnline) {
-                        serialLogModel.add('Log connection failed');
-                    }
-                    serialLog.positionViewAtIndex(serialLogModel.rowCount() - 1, ListView.End);
+                if (!connecting && !logOnline) {
+                    serialLogModel.add('Log connection failed');
                 }
+                serialLog.positionViewAtIndex(serialLogModel.rowCount() - 1, ListView.End);
             }
         }
     }
@@ -91,7 +120,7 @@ ApplicationWindow {
     Rectangle {
         visible: uiState === BackEnd.Connecting || uiState === BackEnd.Offline || uiState === BackEnd.NoLog
         height: 25
-        width: 135
+        width: 155
         anchors.right: parent.right
         anchors.top: logToolbar.bottom
         color: "transparent"
@@ -99,7 +128,6 @@ ApplicationWindow {
             text: qsTr("\u26a0 NOT CONNECTED")
             color: "#333333"
             anchors.centerIn: parent
-            font.pixelSize: Qt.application.font.pixelSize * 1.4
         }
     }
 

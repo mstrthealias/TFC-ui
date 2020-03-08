@@ -20,6 +20,7 @@ Page {
             HardwareSensor {
                 title: qsTr("Water Supply Temp Sensor")
                 sensor: backEnd.sensor1
+                lblTopMargin: 0
             }
             HardwareSensor {
                 title: qsTr("Water Return Temp Sensor")
@@ -39,7 +40,7 @@ Page {
             }
 
             Item {
-                height: 24
+                height: 12
                 Layout.fillWidth: true
             }
 

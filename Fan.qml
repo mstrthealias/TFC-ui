@@ -4,12 +4,13 @@ import QtQuick.Layouts 1.13
 import BackEnd 1.0
 
 Item {
+    property int lblTopMargin: 8
     property string title
     property int fanNo
     property var fan
 
     Layout.fillWidth: true
-    height: 149
+    height: 135
 
     Connections {
         target: backEnd
@@ -116,16 +117,15 @@ Item {
         stackView.currentItem.load()
     }
 
-    Text {
+    Label {
         id: titleText
         text: title
-        height: 40
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.topMargin: lblTopMargin
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 18
         font.bold: true
     }
 
@@ -134,6 +134,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.topMargin: 4
 
         columns: 1
 
@@ -195,7 +196,6 @@ Item {
                 id: editTblButton
                 visible: fan.mode === BackEnd.ControlMode.Tbl
                 text: qsTr("Edit Table")
-                font.pixelSize: 16
                 Layout.margins: 4
                 onClicked: {
                     showFanTbl(fan, fanNo)
@@ -206,7 +206,6 @@ Item {
                 id: editPIDButton
                 visible: fan.mode === BackEnd.ControlMode.PID
                 text: qsTr("Edit PID Settings")
-                font.pixelSize: 16
                 Layout.margins: 4
                 onClicked: {
                     showFanPID(fan.source, fanNo)

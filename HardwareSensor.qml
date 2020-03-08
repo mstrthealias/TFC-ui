@@ -7,20 +7,20 @@ Item {
     property var sensor
 
     property int fieldMinWidth: 145
+    property int lblTopMargin: 8
 
     Layout.fillWidth: true
-    height: 189
+    height: 143
 
-    Text {
+    Label {
         id: titleText
         text: title
-        height: 40
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.topMargin: lblTopMargin
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 18
         font.bold: true
     }
 
@@ -29,6 +29,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.topMargin: 2
 
         columns: 2
 

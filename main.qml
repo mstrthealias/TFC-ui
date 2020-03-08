@@ -1,14 +1,10 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
+import QtQuick.Controls.Material 2.1
+import QtQuick.Window 2.0
 import BackEnd 1.0
 
 ApplicationWindow {
-    id: window
-    visible: true
-    width: 555
-    height: 800
-    title: qsTr("Teensy Fan Controller")
-
     property int uiState: BackEnd.Connecting
     property int hidState: BackEnd.HidData
 
@@ -16,6 +12,13 @@ ApplicationWindow {
     signal beforeSave()
     // trigger when a view is closed
     signal beforeClose()
+
+    id: window
+    title: qsTr("Teensy Fan Controller")
+    visible: true
+
+    width: 575
+    height: 645
 
     BackEnd {
         id: backEnd
@@ -67,7 +70,6 @@ ApplicationWindow {
         ToolButton {
             id: toolButton
             text: stackView.depth > 1 ? "\u25C0" : "\u2630"
-            font.pixelSize: Qt.application.font.pixelSize * 1.6
             onClicked: {
                 if (stackView.depth > 1) {
                     if (stackView.depth == 2)
@@ -88,17 +90,32 @@ ApplicationWindow {
 
         ToolButton {
             id: statusButton
+            visible: stackView.depth <= 1
             icon.source: "images/worldwide.svg"
             icon.height: 20
             icon.width: 20
-            icon.color: uiState === BackEnd.Offline ? 'red' : (uiState === BackEnd.Online ? '#ededed' : (uiState === BackEnd.Connecting ? 'gray' : 'yellow'))
+            icon.color: {
+                return uiState === BackEnd.Offline
+                        ? 'red'
+                        : (uiState === BackEnd.Online
+                           ? '#ededed'
+                           : (uiState === BackEnd.Connecting ? 'gray' : 'yellow'))
+            }
             display: AbstractButton.IconOnly
             anchors.left: hdrLabel.right
 
-
             ToolTip {
                 visible: parent.hovered
-                text: qsTr(uiState === BackEnd.Offline ? "Log Not Connected\nData Not Connected" : (uiState === BackEnd.Connecting ? 'Connecting' : (uiState === BackEnd.NoLog ? 'Log Not Connected' : (uiState === BackEnd.NoData ? 'Data Not Connected' : 'Connected'))))
+                text: {
+                    return qsTr(uiState === BackEnd.Offline
+                                ? "Log Not Connected\nData Not Connected"
+                                : (uiState === BackEnd.Connecting
+                                   ? 'Connecting'
+                                   : (uiState === BackEnd.NoLog
+                                      ? 'Log Not Connected'
+                                      : (uiState === BackEnd.NoData ? 'Data Not Connected' : 'Connected')))) +
+                            (uiState !== BackEnd.Online && uiState !== BackEnd.Connecting ? "\nClick to retry connection" : '')
+                }
             }
 
             onClicked: {
@@ -135,7 +152,6 @@ ApplicationWindow {
             id: saveButton
             anchors.right: parent.right
             text: qsTr("Save")
-            font.pixelSize: Qt.application.font.pixelSize
             onClicked: {
                 if (hidState !== BackEnd.HidData)
                     return;
@@ -204,7 +220,7 @@ ApplicationWindow {
         id: uiIndicator
         visible: uiState === BackEnd.Connecting || uiState === BackEnd.Offline || uiState === BackEnd.NoData
         height: 25
-        width: 135
+        width: 155
         anchors.top: mainToolbar.bottom
         anchors.right: parent.right
         color: "transparent"
@@ -212,7 +228,6 @@ ApplicationWindow {
             text: qsTr("\u26a0 NOT CONNECTED")
             color: "#333333"
             anchors.centerIn: parent
-            font.pixelSize: Qt.application.font.pixelSize * 1.4
         }
     }
 
@@ -220,7 +235,7 @@ ApplicationWindow {
     Rectangle {
         visible: !uiIndicator.visible && hidState !== BackEnd.HidData
         height: 25
-        width: 205
+        width: 255
         anchors.top: mainToolbar.bottom
         anchors.right: parent.right
         color: "transparent"
@@ -228,7 +243,6 @@ ApplicationWindow {
             text: qsTr(hidState === BackEnd.HidConfig ? "\u26a0 DOWNLOADING CONFIGURATION" : "\u26a0 SAVING CONFIGURATION")
             color: "#333333"
             anchors.centerIn: parent
-            font.pixelSize: Qt.application.font.pixelSize * 1.4
         }
     }
 

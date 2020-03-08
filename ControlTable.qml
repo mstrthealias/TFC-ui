@@ -145,16 +145,14 @@ Item {
         }
     }
 
-    Text {
+    Label {
         id: titleCmp
         text: title
-        height: 40
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 18
         font.bold: true
     }
 
@@ -233,6 +231,7 @@ Item {
         anchors.top: titleCmp.bottom
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.topMargin: 12
         height: listView.contentHeight + addEntryBtn.height + 25
 
         ListView {

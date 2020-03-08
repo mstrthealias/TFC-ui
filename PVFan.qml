@@ -47,19 +47,17 @@ Item {
     RowLayout {
         anchors.fill: parent
 
-        Text {
+        Label {
             text: title
-            lineHeightMode: Text.FixedHeight
-            lineHeight: 63
-            Layout.minimumWidth: 105
-            Layout.maximumWidth: 105
+            Layout.fillHeight: true
+            Layout.minimumWidth: 115
+            Layout.maximumWidth: 115
             verticalAlignment: Text.AlignTop
-            font.pixelSize: 16
         }
 
         TextFieldExt {
             readOnly: true
-            Layout.maximumWidth: 165
+            Layout.maximumWidth: 135
             autoSelectText: false
             minWidth: fieldMinWidth
             label: qsTr("RPM")
@@ -68,7 +66,7 @@ Item {
 
         TextFieldExt {
             readOnly: true
-            Layout.maximumWidth: 165
+            Layout.maximumWidth: 135
             autoSelectText: false
             minWidth: fieldMinWidth
             label: qsTr("PWM")
@@ -77,7 +75,7 @@ Item {
 
         TextFieldExt {
             readOnly: true
-            Layout.maximumWidth: 165
+            Layout.maximumWidth: 135
             autoSelectText: false
             minWidth: fieldMinWidth
             label: qsTr("Mode")

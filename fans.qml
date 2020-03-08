@@ -23,6 +23,7 @@ Page {
                 fan: backEnd.fan1
                 fanNo: 1
                 visible: !!backEnd.fan1.pinPWM
+                lblTopMargin: 0
             }
             Fan {
                 title: qsTr("Fan 2")
