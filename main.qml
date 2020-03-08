@@ -29,9 +29,13 @@ ApplicationWindow {
     LogWindow {
         id: logWindow
         visible: false
-        x: window.width + window.x - 5
-        y: window.y
         onVisibleChanged: {
+            if (visible) {
+                x = window.width + window.x - 5
+                y = window.y
+                if (x + width + 5 > Screen.width)
+                    x -= x + width + 5 - Screen.width;
+            }
             logPageButton.highlighted = visible;
         }
     }
